@@ -1,8 +1,8 @@
 # PROJECT HANDOFF & CONTEXT TRANSFER DOCUMENT
 **Project:** Autonomous Lead Discovery & Verification Agent (CQ Scraper)  
 **Framework:** LangGraph Multi-Agent Architecture (Python 3.11+ / 3.14)  
-**Status:** Phases 0, 1, 2, 3, and 4 Fully Implemented & Verified (56/56 Tests Passing)  
-**Current Handover Point:** Ready for **Phase 5 (Multi-Stage Contact Deliverability & Verification Engine)**
+**Status:** Phases 0, 1, 2, 3, 4, 5, and 6 Fully Implemented & Verified (92/92 Tests Passing)  
+**Current Handover Point:** Ready for **Phase 7 (Hands-Free Google Sheets & Local SQLite Sync)**
 
 ---
 
@@ -16,10 +16,10 @@ Build an autonomous AI agent using **LangGraph** that takes either a natural lan
 ### 100-Point Evaluation Benchmark
 | Metric | Points | Project Implementation Status |
 | :--- | :---: | :--- |
-| **Agent Flow & Autonomy** (searches, follows links, handles dead pages) | **40** | **Phases 3 & 4 Done** (Resilient crawler, link prioritization, dead-page failover, query reformulation). Phase 6 will wire the final LangGraph state machine. |
-| **Contact Accuracy** (real, deliverable contacts, no hallucinated data) | **30** | **Phase 4 Done** (Zero-hallucination extractor, pattern engine). **Phase 5 Next** (DNS MX, non-intrusive SMTP handshake, catch-all detection, profile HEAD checks). |
+| **Agent Flow & Autonomy** (searches, follows links, handles dead pages) | **40** | **Phases 3, 4 & 6 Done** (Resilient crawler, link prioritization, dead-page failover, query reformulation, compiled LangGraph state machine with self-healing feedback loops). |
+| **Contact Accuracy** (real, deliverable contacts, no hallucinated data) | **30** | **Phases 4 & 5 Done** (Zero-hallucination extractor, pattern engine, DNS MX, non-intrusive SMTP handshake, catch-all detection, profile HEAD checks). |
 | **Brochure / PDF Parsing** (extracts targets from uploaded brochure) | **15** | **Phase 2 Done** (Hybrid PyMuPDF + pdfplumber + Vision OCR raster fallback). |
-| **End-to-End Pipeline** (hands-free, from query to populated sheet) | **15** | **Phases 1 & 3 Done**. Phases 7 & 8 will wire live Google Sheet sync & streaming API. |
+| **End-to-End Pipeline** (hands-free, from query to populated sheet) | **15** | **Phases 1, 3 & 6 Done**. Phases 7 & 8 will wire live Google Sheet sync & streaming API. |
 | **TOTAL** | **100** | On track for full 100/100 points. |
 
 ---
@@ -55,10 +55,10 @@ The system outputs records matching this exact 6-field schema. Any violation or 
 
 ## 4. Current Status: What Has Been Built & Tested
 
-All tasks across **Phases 0 through 4** are 100% complete with **56 automated tests passing**:
+All tasks across **Phases 0 through 6** are 100% complete with **92 automated tests passing**:
 
 ```
-============================== 56 passed in 1.62s ==============================
+============================== 92 passed in 1.39s ==============================
 ```
 
 ### Phase 0: Workspace & Dependency Isolation
@@ -119,6 +119,49 @@ All tasks across **Phases 0 through 4** are 100% complete with **56 automated te
   - LLM structured output with deterministic regex fallback.
   - Automatic integration with `EmailPatternEngine` when email is absent.
 - **`tests/test_decision_maker.py`**: 10 unit tests verifying extraction, pattern derivation, and generic email nullification.
+
+### Phase 5: Multi-Stage Contact Deliverability & Verification Engine (`src/verifier/`)
+- **`src/verifier/syntax_check.py` (`EmailSyntaxValidator`)**:
+  - RFC 5321/5322 syntax validation via `email-validator`.
+  - Common domain typo auto-detection and suggestion (`gmial.com` -> `gmail.com`, `outlok.com` -> `outlook.com`).
+  - Negative filter rejecting generic corporate inboxes (`info@`, `contact@`, `admin@`, etc.).
+- **`src/verifier/mx_resolver.py` (`DNSMXResolver`)**:
+  - Asynchronous DNS MX record lookup via `dnspython` with priority-sorted records.
+  - RFC 7505 Null MX detection (rejects domains with null mail exchangers).
+  - Handles NXDOMAIN and NoAnswer with in-memory caching.
+- **`src/verifier/smtp_handshake.py` (`SMTPHandshakeVerifier`)**:
+  - Non-intrusive asynchronous socket handshake (`HELO` -> `MAIL FROM` -> `RCPT TO` -> `RSET` -> `QUIT`).
+  - Never transmits message data (`DATA` command is prohibited).
+  - Catch-All probing with randomized test recipient addresses.
+  - Graceful port 25 blocking / firewall fallback handling.
+- **`src/verifier/social_validator.py` (`SocialProfileValidator`)**:
+  - Asynchronous HTTP HEAD/GET validation of personal profile links (LinkedIn `/in/*`, Instagram, X, faculty directories).
+  - Negative filtering of corporate pages (`linkedin.com/company/*`, `instagram.com/p/*`, `x.com/explore`).
+  - Detection of 404/suspended/deleted profile pages.
+- **`src/verifier/contact_verifier.py` (`ContactVerifier`)**:
+  - Master pipeline coordinating syntax check -> MX resolution -> SMTP handshake & catch-all test -> pattern derivation check -> social profile fallback.
+  - Strictly enforces Zero-Hallucination mandate: unverified leads return `is_deliverable=False` or `None`.
+  - `verify_decision_maker` helper generating validated 6-field `FinalLeadRecord`.
+- **`tests/test_verifier.py`**: 20 unit tests covering syntax, typo correction, MX resolution, SMTP handshakes, catch-all detection, and end-to-end verification.
+
+### Phase 6: LangGraph State Machine Assembly & Feedback Loops (`src/graph/`)
+- **`src/graph/nodes.py`**:
+  - `parse_input_node`: Ingests brochure PDF or search query; generates target seeds filtered by category focus.
+  - `expand_targets_node`: Synthesizes corporate and delegation search queries via `QueryGenerator`.
+  - `search_web_node`: Queries Google/Tavily via `UnifiedSearchClient` and ranks candidate URLs.
+  - `crawl_page_node`: Deep crawls target domains, parses markdown, extracts emails and handles dead links.
+  - `dead_link_recovery_node`: Generates dead-page pivot queries and increments retry counts without failing the run.
+  - `extract_decision_maker_node`: Extracts human decision-makers, rejecting generic mailboxes.
+  - `social_dork_search_node`: Fallback LinkedIn search when direct corporate websites contain no individual names.
+  - `verify_contact_node`: Coordinates multi-stage deliverability verification via `ContactVerifier` and advances the target queue.
+  - `sync_sheet_node`: Formats the final 6-column sheet rows and marks workflow completion.
+- **`src/graph/edges.py`**:
+  - `route_after_crawl`: Routes dead/blocked pages to `dead_link_recovery` or advances to extraction.
+  - `route_after_extraction`: Routes to `social_dork_search` if website lacks names or advances to verification.
+  - `route_after_verification`: Self-healing cyclical loop back to `expand_targets` until queue exhaustion or quota reached.
+- **`src/graph/lead_graph.py`**:
+  - Compiles master `StateGraph(AgentState)` with `MemorySaver` checkpointer for state auditability, pause/resume, and event streaming.
+- **`tests/test_graph_flow.py`**: 16 unit and integration tests covering node execution, conditional branching, dead link recovery, and full end-to-end flow.
 
 ---
 
@@ -206,39 +249,22 @@ CQ_Scraper/
 
 ## 6. What Needs to Be Done Next: Step-by-Step
 
-The next person or agent should implement **Phase 5 through Phase 10** in sequential order:
+Phases 0 through 6 are complete and verified. The next step is **Phase 7 through Phase 10** in sequential order:
 
-### NEXT STEP: Phase 5 — Multi-Stage Contact Deliverability & Verification Engine
-*(Targeting 30 Points: Contact Accuracy & Zero Hallucination)*
-1. **`src/verifier/syntax_check.py`**:
-   - RFC 5321/5322 validation using `email-validator`.
-   - Domain typo checks (e.g. `gmial.com` $\to$ `gmail.com`).
-2. **`src/verifier/mx_resolver.py`**:
-   - Asynchronous DNS MX lookup via `dnspython` (`dns.asyncresolver.Resolver()`).
-   - Verifies target domain has active mail exchanges; discards emails with no MX.
-3. **`src/verifier/smtp_handshake.py`**:
-   - Non-intrusive asynchronous socket SMTP handshake via `aiosmtplib` on port 25 (`HELO` $\to$ `MAIL FROM` $\to$ `RCPT TO` $\to$ `RSET` $\to$ `QUIT`).
-   - Never sends emails (`DATA` command is never executed).
-   - **Catch-All Probe:** Sends `RCPT TO` for a randomized UUID address (e.g., `chk_rand_98124@domain.com`). If server returns `250 OK`, domain is catch-all:
-     - Non-catch-all direct `250 OK` $\to$ `"Verified"`
-     - Catch-all with verified domain pattern $\to$ `"Pattern-Derived"`
-     - Response `550` or connection drop $\to$ Discard email, fallback to profile link.
-4. **`src/verifier/social_validator.py`**:
-   - Async HTTP `HEAD` / `GET` check on candidate social profile links (LinkedIn, Instagram, X).
-   - Validates HTTP 200 and confirms profile is live.
-5. **`src/verifier/contact_verifier.py`**:
-   - Master verifier orchestrator returning `VerificationResult(contact_channel, status, is_deliverable)`.
-6. **`tests/test_verifier.py`**:
-   - Unit tests mocking DNS and SMTP sockets, catch-all detection, and live profile checks.
+### NEXT STEP: Phase 7 — Hands-Free Google Sheets & Local SQLite Sync
+*(Targeting 15 Points: End-to-End Pipeline)*
+1. **`src/storage/google_sheets.py`**:
+   - Authenticate with Google Service Account credentials via `gspread`.
+   - Idempotent sheet initialization: enforce exact 6-column headers with navy styling (`#1E293B`) and frozen header row.
+   - Deduplication against existing rows (`Organization Name` and `Contact Channel`).
+   - Batch row insertion (`append_rows`) in chunks to respect Google API limits.
+   - Color code `Verification Status` cells (Green for "Verified", Amber for "Pattern-Derived").
+2. **`src/storage/database.py`**:
+   - Local SQLite database (`aiosqlite`) storing run histories, raw crawl snippets, MX records, and timestamps for offline replayability and evaluation audit.
+3. **`tests/test_storage.py`**:
+   - Unit tests mocking `gspread` client, batch insertions, duplicate prevention, and SQLite persistence.
 
 ---
-
-### Upcoming Phases Overview
-
-#### Phase 6: LangGraph State Machine Assembly & Feedback Loops
-- Wire nodes (`parse_input_node`, `expand_targets_node`, `search_web_node`, `crawl_page_node`, `extract_decision_maker_node`, `verify_contact_node`, `dead_link_recovery_node`, `sync_sheet_node`) into a compiled `StateGraph`.
-- Implement conditional edges (`route_after_crawl`, `route_after_verification`, `check_completion`).
-- Attach `MemorySaver` checkpointer for state persistence.
 
 #### Phase 7: Hands-Free Google Sheets & Local SQLite Sync
 - **`src/storage/google_sheets.py`**: Google Service Account authentication via `gspread`, automatic header creation with navy styling (`#1E293B`), deduplication against existing rows, and batch cell insertion (`append_rows`).

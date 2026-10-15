@@ -128,13 +128,13 @@ Extract the actual individual decision-maker (name and role) and discover their 
 Verify that every extracted contact channel is genuine, exists, and is deliverable before it reaches the final output sheet.
 
 #### Micro Elementary Tasks:
-- [ ] **Task 5.1: RFC Syntax & Typo Validation (`src/verifier/syntax_check.py`)**
+- [x] **Task 5.1: RFC Syntax & Typo Validation (`src/verifier/syntax_check.py`)**
   - Validate syntax against RFC 5321/5322 via `email-validator`.
   - Check for common domain typos (`gmial.com`, `outlok.com`).
-- [ ] **Task 5.2: DNS MX Record Resolver (`src/verifier/mx_resolver.py`)**
+- [x] **Task 5.2: DNS MX Record Resolver (`src/verifier/mx_resolver.py`)**
   - Query DNS MX records via `dnspython` with asynchronous resolver.
   - Verify that the target domain has active, reachable mail exchange servers. Discard emails with missing or null MX records.
-- [ ] **Task 5.3: Non-Intrusive SMTP Handshake & Catch-All Detection (`src/verifier/smtp_handshake.py`)**
+- [x] **Task 5.3: Non-Intrusive SMTP Handshake & Catch-All Detection (`src/verifier/smtp_handshake.py`)**
   - Connect to target MX host on port 25 with a polite HELO/EHLO identity.
   - Send `MAIL FROM:<verify@verified-leads.org>` and `RCPT TO:<candidate@domain.com>`.
   - Capture SMTP response codes (250 OK = deliverable, 550 = mailbox does not exist).
@@ -143,7 +143,7 @@ Verify that every extracted contact channel is genuine, exists, and is deliverab
     - Direct 250 OK on individual email (Non-Catch-All) $\to$ `"Verified"`.
     - Derived via pattern on Catch-All or confirmed domain $\to$ `"Pattern-Derived"`.
     - 550 / Dead $\to$ Discard completely.
-- [ ] **Task 5.4: Social Profile Liveness Verification (`src/verifier/social_validator.py`)**
+- [x] **Task 5.4: Social Profile Liveness Verification (`src/verifier/social_validator.py`)**
   - Perform async HTTP `HEAD` or `GET` request to candidate profile URLs.
   - Confirm HTTP 200 response and absence of "Profile Not Found", "Page Expired", or "Login Required" error screens.
   - Mark verified live profile links as `"Verified"`.
@@ -157,14 +157,14 @@ Verify that every extracted contact channel is genuine, exists, and is deliverab
 Assemble the isolated nodes into an autonomous LangGraph `StateGraph` with conditional branches, retry limits, and dead-page recovery.
 
 #### Micro Elementary Tasks:
-- [ ] **Task 6.1: Node Implementation (`src/graph/nodes.py`)**
+- [x] **Task 6.1: Node Implementation (`src/graph/nodes.py`)**
   - Implement `parse_input_node`, `expand_targets_node`, `search_web_node`, `crawl_page_node`, `extract_decision_maker_node`, `verify_contact_node`, `sync_sheet_node`.
-- [ ] **Task 6.2: Conditional Edges & Routing (`src/graph/edges.py`)**
+- [x] **Task 6.2: Conditional Edges & Routing (`src/graph/edges.py`)**
   - `route_after_crawl`: If current URL returned 404 or dead, route to `handle_dead_link_node` (reformulates search query) without aborting.
   - `route_after_extraction`: If decision-maker not found on website, route to `social_dork_search_node`.
   - `route_after_verification`: If contact unverified, attempt fallback to authentic social profile; if none, drop lead and proceed to next organization.
   - `check_completion`: Loop until all target organizations are processed or quota reached.
-- [ ] **Task 6.3: State Graph Compilation & Checkpointing (`src/graph/lead_graph.py`)**
+- [x] **Task 6.3: State Graph Compilation & Checkpointing (`src/graph/lead_graph.py`)**
   - Compile the `StateGraph` with `MemorySaver` checkpointer for auditability, pause/resume, and replayability.
 
 ---
