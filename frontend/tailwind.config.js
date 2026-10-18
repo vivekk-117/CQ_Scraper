@@ -1,70 +1,55 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./app/**/*.{js,jsx,mdx}",
+    "./components/**/*.{js,jsx,mdx}",
+    "./lib/**/*.{js,jsx}",
   ],
-  darkMode: "class",
   theme: {
     extend: {
       colors: {
-        canvas: "#080B11",
-        surface: {
-          1: "#0F172A",
-          2: "#1E293B",
-          3: "#334155",
-        },
+        app: "#F7F8FA",
+        surface: "#FFFFFF",
+        secondary: "#F1F3F5",
         border: {
-          subtle: "#1E293B",
-          active: "#3B82F6",
+          DEFAULT: "#E2E6EA",
+          subtle: "#F1F3F5",
         },
-        brand: {
-          DEFAULT: "#6366F1",
-          hover: "#4F46E5",
+        action: {
+          DEFAULT: "#2457C5",
+          hover: "#1B44A0",
         },
         sponsor: {
-          DEFAULT: "#14B8A6",
-          bg: "rgba(20, 184, 166, 0.1)",
-          border: "rgba(20, 184, 166, 0.2)",
+          DEFAULT: "#087F8C",
+          bg: "#E6F6F8",
         },
         delegation: {
-          DEFAULT: "#8B5CF6",
-          bg: "rgba(139, 92, 246, 0.1)",
-          border: "rgba(139, 92, 246, 0.2)",
+          DEFAULT: "#6B4DB3",
+          bg: "#F2EEFA",
         },
-        verified: {
-          DEFAULT: "#10B981",
-          bg: "rgba(16, 185, 129, 0.1)",
-          border: "rgba(16, 185, 129, 0.2)",
+        success: {
+          DEFAULT: "#18794E",
+          bg: "#EBF8F1",
         },
-        derived: {
-          DEFAULT: "#F59E0B",
-          bg: "rgba(245, 158, 11, 0.1)",
-          border: "rgba(245, 158, 11, 0.2)",
+        warning: {
+          DEFAULT: "#946200",
+          bg: "#FEF7E8",
         },
-        dead: {
-          DEFAULT: "#F43F5E",
-          bg: "rgba(244, 63, 94, 0.1)",
-          border: "rgba(244, 63, 94, 0.2)",
+        error: {
+          DEFAULT: "#B42318",
+          bg: "#FEE4E2",
+        },
+        text: {
+          primary: "#17202A",
+          secondary: "#5F6B76",
+          muted: "#77818B",
         },
       },
       fontFamily: {
         sans: ["Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
-        mono: ["JetBrains Mono", "Fira Code", "monospace"],
-      },
-      animation: {
-        "pulse-subtle": "pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite",
-        "shimmer": "shimmer 2s linear infinite",
-      },
-      keyframes: {
-        shimmer: {
-          "0%": { backgroundPosition: "-200% 0" },
-          "100%": { backgroundPosition: "200% 0" },
-        },
+        mono: ["JetBrains Mono", "monospace"],
       },
     },
   },
   plugins: [],
 };
-

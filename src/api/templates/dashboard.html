@@ -1,838 +1,1847 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CQ Scraper — Autonomous Lead Discovery & Verification Agent</title>
+  <title>CQ Scraper — IIT Kharagpur Event Lead Discovery</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <script src="https://unpkg.com/lucide@latest"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            canvas: '#080B11',
-            surface: { 1: '#0F172A', 2: '#1E293B', 3: '#334155' },
-            brand: { DEFAULT: '#6366F1', hover: '#4F46E5' },
-          },
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            mono: ['JetBrains Mono', 'monospace'],
-          }
-        }
-      }
-    };
-  </script>
   <style>
-    body { background-color: #080B11; color: #F8FAFC; }
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #080B11; }
-    ::-webkit-scrollbar-thumb { background: #1E293B; border-radius: 9999px; }
-    ::-webkit-scrollbar-thumb:hover { background: #334155; }
-    .pulse-subtle { animation: pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-app: #F7F8FA;
+      --bg-surface: #FFFFFF;
+      --bg-secondary: #F1F3F5;
+      --text-primary: #17202A;
+      --text-secondary: #5F6B76;
+      --text-muted: #77818B;
+      --border: #E2E6EA;
+      --border-focus: #2457C5;
+      --action-primary: #2457C5;
+      --action-primary-hover: #1B44A0;
+      --cat-sponsor: #087F8C;
+      --cat-sponsor-bg: #E6F6F8;
+      --cat-delegation: #6B4DB3;
+      --cat-delegation-bg: #F2EEFA;
+      --success: #18794E;
+      --success-bg: #EBF8F1;
+      --warning: #946200;
+      --warning-bg: #FEF7E8;
+      --error: #B42318;
+      --error-bg: #FEE4E2;
+      --radius-sm: 8px;
+      --radius-md: 10px;
+      --radius-lg: 12px;
+      --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.05);
+      --shadow-md: 0 4px 8px -2px rgba(16, 24, 40, 0.08), 0 2px 4px -2px rgba(16, 24, 40, 0.04);
+      --shadow-lg: 0 12px 16px -4px rgba(16, 24, 40, 0.08), 0 4px 6px -2px rgba(16, 24, 40, 0.03);
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-app);
+      color: var(--text-primary);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Header & Navigation ────────────────────────────── */
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      height: 56px;
+      display: flex;
+      align-items: center;
+    }
+    .header-inner {
+      max-width: 1040px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+    .brand-mark {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      background: var(--action-primary);
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: -0.02em;
+    }
+    .brand-meta {
+      display: flex;
+      flex-direction: column;
+    }
+    .brand-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.2;
+    }
+    .brand-subtitle {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .nav-tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--bg-secondary);
+      padding: 3px;
+      border-radius: var(--radius-sm);
+    }
+    .nav-tab-btn {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      padding: 6px 14px;
+      border-radius: 6px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .nav-tab-btn:hover {
+      color: var(--text-primary);
+    }
+    .nav-tab-btn.active {
+      background: var(--bg-surface);
+      color: var(--action-primary);
+      font-weight: 600;
+      box-shadow: var(--shadow-sm);
+    }
+    .tab-badge {
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      padding: 1px 6px;
+      border-radius: 10px;
+    }
+    .nav-tab-btn.active .tab-badge {
+      background: #EBF0FA;
+      color: var(--action-primary);
+    }
+
+    /* ── Main Layout ────────────────────────────────────── */
+    .app-main {
+      flex: 1;
+      max-width: 1040px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 32px 24px 64px 24px;
+    }
+
+    /* ── Section Titles ─────────────────────────────────── */
+    .page-heading {
+      margin-bottom: 24px;
+    }
+    .page-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+    }
+    .page-description {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    /* ── Discovery Card ─────────────────────────────────── */
+    .discovery-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+    .field-label {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .field-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .field-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .search-input-area {
+      width: 100%;
+      min-height: 90px;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--text-primary);
+      background: var(--bg-surface);
+      resize: vertical;
+      line-height: 1.5;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .search-input-area::placeholder {
+      color: var(--text-muted);
+    }
+    .search-input-area:focus {
+      outline: none;
+      border-color: var(--action-primary);
+      box-shadow: 0 0 0 3px rgba(36, 87, 197, 0.12);
+    }
+
+    /* ── Prompt Suggestions ─────────────────────────────── */
+    .suggestions-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .suggestion-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-right: 4px;
+    }
+    .suggestion-chip {
+      font-size: 12px;
+      color: var(--text-secondary);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .suggestion-chip:hover {
+      background: #EDF2FC;
+      border-color: #C3D4F5;
+      color: var(--action-primary);
+    }
+
+    /* ── Controls Row ───────────────────────────────────── */
+    .controls-grid {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 20px;
+      align-items: center;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+    .selector-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .selector-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .segment-picker {
+      display: inline-flex;
+      background: var(--bg-secondary);
+      padding: 3px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      width: fit-content;
+    }
+    .segment-btn {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      padding: 6px 14px;
+      border: none;
+      background: transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .segment-btn:hover {
+      color: var(--text-primary);
+    }
+    .segment-btn.active {
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      font-weight: 600;
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* ── Brochure Section (Progressive Disclosure) ──────── */
+    .brochure-disclosure {
+      margin-top: 18px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+    }
+    .disclosure-toggle {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      padding: 0;
+      transition: color 0.15s;
+    }
+    .disclosure-toggle:hover {
+      color: var(--text-primary);
+    }
+    .disclosure-toggle i {
+      transition: transform 0.2s ease;
+    }
+    .disclosure-toggle.open i {
+      transform: rotate(180deg);
+    }
+    .disclosure-content {
+      margin-top: 12px;
+    }
+    .dropzone-container {
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px;
+      text-align: center;
+      background: var(--bg-secondary);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .dropzone-container:hover {
+      border-color: var(--action-primary);
+      background: #F4F7FD;
+    }
+    .dropzone-lead {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    .dropzone-subtext {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .uploaded-file-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      margin-top: 8px;
+    }
+    .file-details {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .file-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    .file-size {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .file-remove-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+    }
+    .file-remove-btn:hover {
+      color: var(--error);
+      background: var(--error-bg);
+    }
+
+    /* ── Action Buttons ─────────────────────────────────── */
+    .btn-action-primary {
+      font-size: 14px;
+      font-weight: 600;
+      color: #FFFFFF;
+      background: var(--action-primary);
+      border: none;
+      padding: 10px 22px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .btn-action-primary:hover {
+      background: var(--action-primary-hover);
+    }
+    .btn-action-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .btn-secondary {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+    .btn-secondary:hover {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+
+    /* ── Running Status Card ────────────────────────────── */
+    .progress-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px 24px;
+      margin-top: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+    .progress-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .progress-state-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--action-primary);
+      display: inline-block;
+    }
+    .live-dot.pulsing {
+      animation: pulse-dot 1.8s infinite ease-in-out;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.35; transform: scale(0.85); }
+    }
+    .progress-state-sub {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+    .progress-counter {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      background: var(--bg-secondary);
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    /* ── Stepper Indicator ──────────────────────────────── */
+    .step-progress-bar {
+      display: flex;
+      align-items: center;
+      margin: 18px 0;
+      padding: 12px 16px;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-sm);
+    }
+    .step-node {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      flex: 1;
+    }
+    .step-circle {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--bg-surface);
+      border: 1.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .step-node.active {
+      color: var(--action-primary);
+      font-weight: 600;
+    }
+    .step-node.active .step-circle {
+      border-color: var(--action-primary);
+      background: var(--action-primary);
+      color: #FFFFFF;
+    }
+    .step-node.done {
+      color: var(--success);
+    }
+    .step-node.done .step-circle {
+      border-color: var(--success);
+      background: var(--success);
+      color: #FFFFFF;
+    }
+    .step-separator {
+      color: var(--border);
+      font-size: 14px;
+      margin: 0 10px;
+    }
+
+    /* ── Technical Activity Log (Progressive Disclosure) ── */
+    .tech-log-wrapper {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+    .tech-log-terminal {
+      margin-top: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+      background: #111827;
+      color: #E5E7EB;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      line-height: 1.6;
+    }
+    .tech-log-line {
+      display: flex;
+      gap: 8px;
+    }
+    .tech-log-time {
+      color: #9CA3AF;
+      flex-shrink: 0;
+    }
+    .tech-log-node {
+      color: #60A5FA;
+      flex-shrink: 0;
+    }
+    .tech-log-msg {
+      word-break: break-all;
+    }
+    .tech-log-msg.error { color: #FCA5A5; }
+    .tech-log-msg.success { color: #86EFAC; }
+    .tech-log-msg.warn { color: #FDE047; }
+
+    /* ── Leads Management Page ──────────────────────────── */
+    .leads-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .leads-bar-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .filter-controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .search-box-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 220px;
+      max-width: 320px;
+    }
+    .search-box-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    .search-box-input {
+      width: 100%;
+      padding: 7px 12px 7px 32px;
+      font-size: 13px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-surface);
+      color: var(--text-primary);
+    }
+    .search-box-input:focus {
+      outline: none;
+      border-color: var(--action-primary);
+    }
+    .pill-group {
+      display: inline-flex;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 2px;
+    }
+    .pill-btn {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      background: transparent;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .pill-btn:hover {
+      color: var(--text-primary);
+    }
+    .pill-btn.active {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+    .pill-btn.active.sponsor {
+      background: var(--cat-sponsor-bg);
+      color: var(--cat-sponsor);
+    }
+    .pill-btn.active.delegation {
+      background: var(--cat-delegation-bg);
+      color: var(--cat-delegation);
+    }
+
+    /* ── Leads Table ────────────────────────────────────── */
+    .table-container {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+    .table-scroll-area {
+      overflow-x: auto;
+    }
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+    table.data-table th {
+      background: var(--bg-secondary);
+      padding: 10px 16px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    table.data-table td {
+      padding: 12px 16px;
+      font-size: 13px;
+      color: var(--text-primary);
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    table.data-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+    table.data-table tbody tr {
+      cursor: pointer;
+      transition: background 0.1s ease;
+    }
+    table.data-table tbody tr:hover {
+      background: #F8FAFC;
+    }
+
+    /* ── Table Badges & Cell Elements ───────────────────── */
+    .badge-category {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+    .badge-category.sponsor {
+      background: var(--cat-sponsor-bg);
+      color: var(--cat-sponsor);
+    }
+    .badge-category.delegation {
+      background: var(--cat-delegation-bg);
+      color: var(--cat-delegation);
+    }
+    .badge-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+    .badge-status.verified {
+      background: var(--success-bg);
+      color: var(--success);
+    }
+    .badge-status.derived {
+      background: var(--warning-bg);
+      color: var(--warning);
+    }
+    .channel-cell {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      max-width: 200px;
+    }
+    .channel-link {
+      color: var(--action-primary);
+      text-decoration: none;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      display: inline-block;
+      max-width: 170px;
+    }
+    .channel-link:hover {
+      text-decoration: underline;
+    }
+    .icon-copy-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 2px 4px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .icon-copy-btn:hover {
+      color: var(--text-primary);
+      background: var(--bg-secondary);
+    }
+    .btn-row-action {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .btn-row-action:hover {
+      border-color: var(--action-primary);
+      color: var(--action-primary);
+      background: #F4F7FD;
+    }
+
+    /* ── Empty States ───────────────────────────────────── */
+    .empty-placeholder {
+      padding: 48px 20px;
+      text-align: center;
+    }
+    .empty-icon {
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .empty-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    .empty-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* ── Lead Detail Drawer (Section 5.D) ───────────────── */
+    .drawer-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(17, 24, 39, 0.4);
+      z-index: 50;
+      display: flex;
+      justify-content: flex-end;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .drawer-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .drawer-panel {
+      width: 100%;
+      max-width: 440px;
+      background: var(--bg-surface);
+      height: 100%;
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow-y: auto;
+    }
+    .drawer-overlay.open .drawer-panel {
+      transform: translateX(0);
+    }
+    .drawer-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .drawer-heading-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .drawer-close-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 6px;
+      border-radius: var(--radius-sm);
+    }
+    .drawer-close-btn:hover {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+    .drawer-body {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      flex: 1;
+    }
+    .detail-item-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .detail-item-value {
+      font-size: 14px;
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+    .evidence-box {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--text-secondary);
+    }
+    .evidence-box.verified {
+      background: var(--success-bg);
+      border-color: #C3E6D2;
+      color: var(--success);
+    }
+    .evidence-box.derived {
+      background: var(--warning-bg);
+      border-color: #F8DFAC;
+      color: var(--warning);
+    }
+    .drawer-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      background: var(--bg-secondary);
+      display: flex;
+      gap: 8px;
+    }
+
+    /* ── Notification Banners ───────────────────────────── */
+    .banner-notification {
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .banner-notification.success {
+      background: var(--success-bg);
+      border: 1px solid #C3E6D2;
+      color: var(--success);
+    }
+    .banner-notification.error {
+      background: var(--error-bg);
+      border: 1px solid #FECDCA;
+      color: var(--error);
+    }
+
+    /* ── Footer ─────────────────────────────────────────── */
+    .app-footer {
+      border-top: 1px solid var(--border);
+      background: var(--bg-surface);
+      padding: 16px 24px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: auto;
+    }
+
+    /* ── Responsive Mobile Rules ────────────────────────── */
+    @media (max-width: 768px) {
+      .app-header { height: 52px; }
+      .header-inner { padding: 0 16px; }
+      .brand-group { gap: 8px; }
+      .brand-title { font-size: 13px; }
+      .brand-subtitle { display: none; }
+      .nav-tab-btn { padding: 5px 10px; font-size: 12px; }
+      .app-main { padding: 18px 16px; }
+      .controls-grid { grid-template-columns: 1fr; }
+      .step-progress-bar { flex-direction: column; align-items: flex-start; gap: 8px; }
+      .step-separator { display: none; }
+      .search-box-wrap { max-width: 100%; }
+      .filter-controls-row { flex-direction: column; align-items: stretch; }
+      .pill-group { width: 100%; justify-content: space-between; }
+      .leads-bar { flex-direction: column; align-items: flex-start; }
+      .leads-bar-actions { width: 100%; justify-content: space-between; }
+      .empty-placeholder { padding: 32px 16px; }
+    }
+
+    .hidden { display: none !important; }
   </style>
 </head>
-<body class="min-h-screen flex flex-col font-sans selection:bg-indigo-500/30 selection:text-indigo-200">
+<body>
 
-  <!-- Top Navbar -->
-  <header class="sticky top-0 z-50 border-b border-slate-800 bg-[#080B11]/85 backdrop-blur-md">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-400 flex items-center justify-center shadow-lg shadow-indigo-600/30">
-          <span class="text-white font-bold text-sm">CQ</span>
-        </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <h1 class="text-base font-bold text-slate-50 tracking-tight">CQ Scraper</h1>
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-              Autonomous Agent
-            </span>
-          </div>
-          <p class="text-[11px] text-slate-400">
-            LangGraph B2B Sponsor & Collegiate Delegation Extractor
-          </p>
+  <!-- ── Top Navigation Bar ────────────────────────────── -->
+  <header class="app-header" role="banner">
+    <div class="header-inner">
+      <div class="brand-group">
+        <div class="brand-mark">CQ</div>
+        <div class="brand-meta">
+          <span class="brand-title">CQ Scraper</span>
+          <span class="brand-subtitle">IIT Kharagpur Event Lead Discovery</span>
         </div>
       </div>
-
-      <div class="flex items-center gap-3">
-        <div id="liveSheetNavBtn" class="hidden">
-          <a id="navSheetLink" href="#" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold shadow-md transition-all">
-            <i data-lucide="sheet" class="w-3.5 h-3.5"></i>
-            <span>Google Sheet</span>
-            <i data-lucide="external-link" class="w-3 h-3"></i>
-          </a>
-        </div>
-        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-900 border border-slate-800 text-xs text-slate-400">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span>API: Online</span>
-        </div>
-      </div>
+      <nav class="nav-tabs" aria-label="Main Navigation">
+        <button type="button" class="nav-tab-btn active" id="tabNavDiscovery" onclick="switchMainTab('discovery')" aria-current="page">
+          <i data-lucide="compass" style="width:14px;height:14px;"></i>
+          <span>Discovery</span>
+        </button>
+        <button type="button" class="nav-tab-btn" id="tabNavLeads" onclick="switchMainTab('leads')">
+          <i data-lucide="list-filter" style="width:14px;height:14px;"></i>
+          <span>Leads</span>
+          <span class="tab-badge" id="navLeadsCountBadge">0</span>
+        </button>
+      </nav>
     </div>
   </header>
 
-  <!-- Main Container -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+  <main class="app-main" role="main">
 
-    <!-- Hero Title -->
-    <div class="text-center max-w-2xl mx-auto my-3">
-      <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-50 tracking-tight">
-        Autonomous Lead Discovery & Verification
-      </h2>
-      <p class="mt-1.5 text-xs sm:text-sm text-slate-400">
-        Transform event brochures and search prompts into verified sponsor and delegation leads.
-        Real-time deliverability checks and auto-sync to Google Sheets.
-      </p>
-    </div>
-
-    <!-- Input Control Panel -->
-    <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-2xl backdrop-blur-sm max-w-5xl mx-auto">
-      <!-- Tabs -->
-      <div class="flex items-center justify-between border-b border-slate-800/80 pb-3 mb-4">
-        <div class="flex items-center gap-2">
-          <button id="tabPromptBtn" onclick="switchTab('prompt')" class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all bg-indigo-600 text-white shadow-md shadow-indigo-600/30">
-            <i data-lucide="search" class="w-3.5 h-3.5"></i>
-            <span>Natural Language Search Prompt</span>
-          </button>
-          <button id="tabBrochureBtn" onclick="switchTab('brochure')" class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/60">
-            <i data-lucide="file-up" class="w-3.5 h-3.5"></i>
-            <span>Upload Event Brochure (PDF)</span>
-          </button>
-        </div>
-        <button id="resetSessionBtn" onclick="resetDashboard()" class="hidden flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200 hover:bg-slate-800 px-2.5 py-1 rounded-lg transition-colors">
-          <i data-lucide="refresh-cw" class="w-3 h-3"></i>
-          <span>New Session</span>
-        </button>
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- VIEW 1: DISCOVERY WORKSPACE                         -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <section id="viewDiscovery">
+      <div class="page-heading">
+        <h1 class="page-title">Find potential sponsors and delegations</h1>
+        <p class="page-description">Describe the organizations you want to find for your IIT Kharagpur event.</p>
       </div>
 
-      <!-- Tab 1: Prompt Input View -->
-      <div id="promptView" class="space-y-4">
-        <textarea id="searchPromptInput" rows="3" placeholder="E.g., Discover tech companies and corporate sponsors in Bengaluru interested in hackathon sponsorship, or robotic clubs in Tier-1 colleges..." class="w-full bg-slate-950/70 border border-slate-800 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all resize-none"></textarea>
-        <div>
-          <div class="flex items-center gap-1.5 text-xs text-slate-400 mb-2">
-            <i data-lucide="compass" class="w-3.5 h-3.5 text-indigo-400"></i>
-            <span>Quick Example Prompts:</span>
-          </div>
-          <div class="flex flex-wrap gap-2">
-            <button onclick="setPrompt(this.innerText)" class="text-xs bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 hover:border-indigo-500/40 text-slate-300 hover:text-white px-2.5 py-1 rounded-lg transition-all text-left flex items-center gap-1.5">
-              <i data-lucide="sparkles" class="w-3 h-3 text-indigo-400"></i>
-              <span>Find FinTech Sponsors in Bengaluru for Hackathon</span>
-            </button>
-            <button onclick="setPrompt(this.innerText)" class="text-xs bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 hover:border-indigo-500/40 text-slate-300 hover:text-white px-2.5 py-1 rounded-lg transition-all text-left flex items-center gap-1.5">
-              <i data-lucide="sparkles" class="w-3 h-3 text-indigo-400"></i>
-              <span>Robotics Societies and Tech Teams in Delhi</span>
-            </button>
-            <button onclick="setPrompt(this.innerText)" class="text-xs bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 hover:border-indigo-500/40 text-slate-300 hover:text-white px-2.5 py-1 rounded-lg transition-all text-left flex items-center gap-1.5">
-              <i data-lucide="sparkles" class="w-3 h-3 text-indigo-400"></i>
-              <span>AI & SaaS Enterprise Sponsors in Mumbai</span>
-            </button>
-          </div>
+      <div class="discovery-card">
+        <!-- Search Brief Input -->
+        <div class="field-label">
+          <label for="searchBriefInput" class="field-title">Search brief</label>
+          <span class="field-hint">Natural language query</span>
         </div>
-      </div>
+        <textarea id="searchBriefInput" class="search-input-area" rows="3"
+          placeholder="Find Indian robotics companies that sponsor student events, or collegiate technical teams in Delhi"
+          aria-label="Search brief for potential sponsors or college delegations"></textarea>
 
-      <!-- Tab 2: Brochure Upload View -->
-      <div id="brochureView" class="hidden space-y-4">
-        <input type="file" id="brochureFileInput" accept=".pdf,application/pdf" class="hidden" onchange="handleFileSelect(event)" />
-        <div id="dropzoneBox" onclick="document.getElementById('brochureFileInput').click()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)" class="border-2 border-dashed border-slate-800 hover:border-indigo-500/50 rounded-xl p-6 text-center cursor-pointer transition-all bg-gradient-to-b from-slate-900 to-slate-950 flex flex-col items-center justify-center min-h-[140px]">
-          <div class="w-12 h-12 rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mb-2">
-            <i data-lucide="upload-cloud" class="w-6 h-6"></i>
-          </div>
-          <p class="text-sm font-semibold text-slate-200">
-            Drop event brochure PDF here or <span class="text-indigo-400 underline">browse</span>
-          </p>
-          <p class="text-xs text-slate-500 mt-1">Supports multi-page digital PDFs & scanned raster sponsor decks up to 25MB</p>
+        <!-- Suggestions -->
+        <div class="suggestions-row" aria-label="Quick example searches">
+          <span class="suggestion-label">Suggestions:</span>
+          <button type="button" class="suggestion-chip" onclick="applySuggestion(this.textContent)">FinTech sponsors in Bengaluru</button>
+          <button type="button" class="suggestion-chip" onclick="applySuggestion(this.textContent)">Robotics college teams in Delhi</button>
+          <button type="button" class="suggestion-chip" onclick="applySuggestion(this.textContent)">AI and cloud companies in Mumbai</button>
         </div>
-        <div id="fileLoadedBadge" class="hidden bg-slate-950/80 border border-indigo-500/30 rounded-xl p-3.5 flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
-              <i data-lucide="file-text" class="w-5 h-5"></i>
-            </div>
-            <div>
-              <p id="fileNameTxt" class="text-xs font-semibold text-slate-200 truncate max-w-[320px]"></p>
-              <p id="fileSizeTxt" class="text-[11px] text-slate-400"></p>
+
+        <!-- Controls: Category Focus & Target Limit -->
+        <div class="controls-grid">
+          <div class="selector-group">
+            <span class="selector-label">Target category</span>
+            <div class="segment-picker" role="group" aria-label="Category Selection">
+              <button type="button" class="segment-btn active" id="btnCatBoth" onclick="selectCategory('Both')">Both</button>
+              <button type="button" class="segment-btn" id="btnCatSponsor" onclick="selectCategory('Sponsor')">Sponsors</button>
+              <button type="button" class="segment-btn" id="btnCatDelegation" onclick="selectCategory('College Delegation')">College delegations</button>
             </div>
           </div>
-          <button type="button" onclick="clearFile()" class="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg">
-            <i data-lucide="x" class="w-4 h-4"></i>
-          </button>
-        </div>
-      </div>
-
-      <!-- Controls & Submit -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 mt-3 border-t border-slate-800/80">
-        <div>
-          <label class="block text-xs font-medium text-slate-400 mb-1.5">Category Focus</label>
-          <div class="grid grid-cols-3 gap-1.5 bg-slate-950 p-1 rounded-lg border border-slate-800">
-            <button type="button" onclick="setCategory('Both')" id="catBothBtn" class="py-1 px-2 text-xs font-medium rounded-md transition-all bg-indigo-600 text-white">Both</button>
-            <button type="button" onclick="setCategory('Sponsor')" id="catSponsorBtn" class="py-1 px-2 text-xs font-medium rounded-md transition-all text-slate-400 hover:text-slate-200">Sponsor</button>
-            <button type="button" onclick="setCategory('College Delegation')" id="catDelBtn" class="py-1 px-2 text-xs font-medium rounded-md transition-all text-slate-400 hover:text-slate-200">Delegation</button>
-          </div>
-        </div>
-        <div>
-          <div class="flex justify-between items-center mb-1.5">
-            <label class="text-xs font-medium text-slate-400">Target Extraction Limit</label>
-            <span id="targetCountDisplay" class="text-xs font-semibold text-indigo-400">8 entities</span>
-          </div>
-          <input type="range" id="maxTargetsSlider" min="1" max="20" value="8" oninput="document.getElementById('targetCountDisplay').innerText = this.value + ' entities'" class="w-full accent-indigo-500 bg-slate-800 h-2 rounded-lg cursor-pointer" />
-        </div>
-      </div>
-
-      <div class="pt-4 flex justify-end">
-        <button id="startRunBtn" onclick="startAgentRun()" class="relative inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-white shadow-xl transition-all duration-200 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 hover:shadow-indigo-500/25 active:scale-[0.98] cursor-pointer">
-          <i data-lucide="play" class="w-4 h-4 fill-current"></i>
-          <span>Start Autonomous Discovery & Extraction</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- Live Stats Bar -->
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
-      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
-        <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Discovered</span>
-        <div class="flex items-baseline justify-between mt-2">
-          <span id="statFound" class="text-2xl font-bold text-slate-50">0</span>
-          <span class="text-xs text-slate-500">raw entities</span>
-        </div>
-      </div>
-      <div class="bg-slate-900 border border-emerald-500/20 rounded-xl p-4 flex flex-col justify-between">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-medium text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
-            <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
-            Verified Leads
-          </span>
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        </div>
-        <div class="flex items-baseline justify-between mt-2">
-          <span id="statVerified" class="text-2xl font-bold text-emerald-400">0</span>
-          <span class="text-xs text-emerald-500/80 font-medium">Direct / Live</span>
-        </div>
-      </div>
-      <div class="bg-slate-900 border border-amber-500/20 rounded-xl p-4 flex flex-col justify-between">
-        <span class="text-xs font-medium text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
-          Pattern Derived
-        </span>
-        <div class="flex items-baseline justify-between mt-2">
-          <span id="statDerived" class="text-2xl font-bold text-amber-400">0</span>
-          <span class="text-xs text-amber-500/80 font-medium">≥2 Samples</span>
-        </div>
-      </div>
-      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
-        <span class="text-xs font-medium text-rose-400 uppercase tracking-wider flex items-center gap-1.5">
-          <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
-          Dead Links Handled
-        </span>
-        <div class="flex items-baseline justify-between mt-2">
-          <span id="statDead" class="text-2xl font-bold text-slate-50">0</span>
-          <span class="text-xs text-rose-500/80 font-medium">Auto-Pivoted</span>
-        </div>
-      </div>
-      <div class="col-span-2 md:col-span-1 bg-gradient-to-br from-indigo-950/40 to-slate-900 border border-indigo-500/30 rounded-xl p-4 flex flex-col justify-between shadow-lg shadow-indigo-950/20">
-        <span class="text-xs font-medium text-indigo-400 uppercase tracking-wider flex items-center gap-1">
-          <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
-          Google Sheet Sync
-        </span>
-        <div class="mt-2" id="sheetSyncContainer">
-          <div class="flex items-center gap-1.5 text-xs text-slate-400">
-            <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
-            <span>Awaiting run</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Execution Monitor: Stepper + Terminal Feed -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-      <!-- Stepper (5 Cols) -->
-      <div class="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
-        <div>
-          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-            <h3 class="text-sm font-semibold text-slate-100 flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
-              LangGraph Pipeline Execution
-            </h3>
-            <span id="runStatusBadge" class="text-xs px-2 py-0.5 rounded-full font-medium bg-slate-800 text-slate-300">Idle</span>
-          </div>
-          <div class="space-y-3 mt-4" id="stepperContainer">
-            <div id="step-0" class="flex items-center gap-3 p-3 rounded-xl border border-slate-800/80 bg-slate-950/30 text-slate-500">
-              <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center shrink-0 text-slate-400"><i data-lucide="file-search" class="w-4 h-4"></i></div>
-              <div class="flex-1 flex justify-between items-center"><span class="text-xs font-semibold">1. Analysis</span><span class="status-tag text-[10px] font-mono"></span></div>
-            </div>
-            <div id="step-1" class="flex items-center gap-3 p-3 rounded-xl border border-slate-800/80 bg-slate-950/30 text-slate-500">
-              <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center shrink-0 text-slate-400"><i data-lucide="search" class="w-4 h-4"></i></div>
-              <div class="flex-1 flex justify-between items-center"><span class="text-xs font-semibold">2. Search & Dorking</span><span class="status-tag text-[10px] font-mono"></span></div>
-            </div>
-            <div id="step-2" class="flex items-center gap-3 p-3 rounded-xl border border-slate-800/80 bg-slate-950/30 text-slate-500">
-              <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center shrink-0 text-slate-400"><i data-lucide="globe" class="w-4 h-4"></i></div>
-              <div class="flex-1 flex justify-between items-center"><span class="text-xs font-semibold">3. Deep Web Crawling</span><span class="status-tag text-[10px] font-mono"></span></div>
-            </div>
-            <div id="step-3" class="flex items-center gap-3 p-3 rounded-xl border border-slate-800/80 bg-slate-950/30 text-slate-500">
-              <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center shrink-0 text-slate-400"><i data-lucide="check-circle" class="w-4 h-4"></i></div>
-              <div class="flex-1 flex justify-between items-center"><span class="text-xs font-semibold">4. Deliverability Gate</span><span class="status-tag text-[10px] font-mono"></span></div>
-            </div>
-            <div id="step-4" class="flex items-center gap-3 p-3 rounded-xl border border-slate-800/80 bg-slate-950/30 text-slate-500">
-              <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center shrink-0 text-slate-400"><i data-lucide="sheet" class="w-4 h-4"></i></div>
-              <div class="flex-1 flex justify-between items-center"><span class="text-xs font-semibold">5. Google Sheet Sync</span><span class="status-tag text-[10px] font-mono"></span></div>
-            </div>
-          </div>
-        </div>
-        <div id="deadAlertBox" class="hidden mt-4 p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-center gap-2.5 text-xs text-amber-300">
-          <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-400 shrink-0"></i>
           <div>
-            <p class="font-semibold">Dead-Link Recovery Active</p>
-            <p class="text-[11px] text-amber-400/80" id="deadAlertMsg">Dead page handled; pivoted to targeted dorking.</p>
+            <button type="button" id="btnFindLeads" class="btn-action-primary" onclick="triggerDiscoveryRun()">
+              <i data-lucide="search" style="width:15px;height:15px;"></i>
+              <span>Find leads</span>
+            </button>
           </div>
         </div>
-      </div>
 
-      <!-- Terminal Feed (7 Cols) -->
-      <div class="lg:col-span-7 bg-[#05080E] border border-slate-800 rounded-2xl p-4 flex flex-col h-[380px]">
-        <div class="flex items-center justify-between pb-3 border-b border-slate-800/80 shrink-0">
-          <div class="flex items-center gap-2">
-            <div class="flex items-center gap-1.5">
-              <span class="w-2.5 h-2.5 rounded-full bg-rose-500/80"></span>
-              <span class="w-2.5 h-2.5 rounded-full bg-amber-500/80"></span>
-              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></span>
-            </div>
-            <span class="text-xs font-mono text-slate-400 ml-2 flex items-center gap-1.5">
-              <i data-lucide="terminal" class="w-3.5 h-3.5 text-indigo-400"></i>
-              Agent Activity Stream
-            </span>
-          </div>
-          <button id="toggleScrollBtn" onclick="toggleAutoScroll()" class="text-[11px] font-mono px-2 py-0.5 rounded border border-indigo-500/30 bg-slate-800 text-indigo-400">
-            Auto-scroll: ON
+        <!-- Brochure PDF Upload (Progressive Disclosure) -->
+        <div class="brochure-disclosure">
+          <button type="button" class="disclosure-toggle" id="btnToggleBrochure" onclick="toggleBrochureUpload()" aria-expanded="false">
+            <i data-lucide="chevron-down" style="width:14px;height:14px;"></i>
+            <span>Attach event brochure (PDF)</span>
+            <span style="color:var(--text-muted);font-weight:400;margin-left:4px;">— optional, extracts sponsor context</span>
           </button>
-        </div>
-        <div id="terminalBody" class="flex-1 overflow-y-auto font-mono text-[13px] leading-relaxed p-2 space-y-1.5">
-          <div class="text-slate-600 italic py-8 text-center" id="terminalPlaceholder">
-            Agent idle. Submit a search prompt or brochure to initiate live stream.
+          <div id="brochureUploadArea" class="disclosure-content hidden">
+            <input type="file" id="inputBrochureFile" accept=".pdf,application/pdf" style="display:none;" onchange="onBrochureSelected(event)" />
+            <div id="dropzoneBox" class="dropzone-container" onclick="document.getElementById('inputBrochureFile').click()" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDropFile(event)" tabindex="0" role="button" aria-label="Drop brochure PDF here">
+              <div class="dropzone-lead">Drop event brochure PDF here or <span style="color:var(--action-primary);text-decoration:underline;">browse files</span></div>
+              <div class="dropzone-subtext">PDF up to 25 MB · Digital brochures or scanned decks</div>
+            </div>
+            <div id="selectedFileBadge" class="uploaded-file-row hidden">
+              <div class="file-details">
+                <i data-lucide="file-text" style="width:16px;height:16px;color:var(--action-primary);"></i>
+                <div>
+                  <div class="file-name" id="labelFileName"></div>
+                  <div class="file-size" id="labelFileSize"></div>
+                </div>
+              </div>
+              <button type="button" class="file-remove-btn" onclick="clearSelectedFile()" aria-label="Remove attached file">
+                <i data-lucide="x" style="width:14px;height:14px;"></i>
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Master 6-Field Leads Table -->
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
-      <div class="p-5 border-b border-slate-800 bg-slate-900/90 flex flex-col md:flex-row gap-4 items-center justify-between">
-        <div>
-          <h2 class="text-base font-semibold text-slate-100 flex items-center gap-2">
-            <i data-lucide="building-2" class="w-5 h-5 text-indigo-400"></i>
-            <span>Master Leads Roster (Strict 6-Field Output Schema)</span>
-            <span id="leadCountBadge" class="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-300 font-mono">0 leads</span>
-          </h2>
-          <p class="text-xs text-slate-400 mt-1">
-            Real human decision-makers verified through MX DNS, SMTP handshake, or authentic social profiles.
-          </p>
+      <!-- Running Job Progress Card -->
+      <div id="cardRunningJob" class="progress-card hidden">
+        <div class="progress-header">
+          <div>
+            <div class="progress-state-title">
+              <span class="live-dot pulsing" id="statusPulseDot"></span>
+              <span id="labelProgressStatus">Finding relevant organizations…</span>
+            </div>
+            <div class="progress-state-sub" id="labelProgressSubtext">LangGraph cyclical agent is executing search queries.</div>
+          </div>
+          <div class="progress-counter" id="badgeFoundCounter">0 leads discovered</div>
         </div>
-        <div id="tableSheetCta" class="hidden">
-          <a id="tableSheetLink" href="#" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-emerald-950/20 transition-all">
-            <i data-lucide="sheet" class="w-4 h-4"></i>
+
+        <!-- 4-Stage Step Indicator -->
+        <div class="step-progress-bar" id="stepperWorkflow" role="group" aria-label="LangGraph Pipeline Execution">
+          <div class="step-node active" id="stepSearching">
+            <div class="step-circle">1</div>
+            <span>Searching</span>
+          </div>
+          <span class="step-separator">→</span>
+          <div class="step-node" id="stepReviewing">
+            <div class="step-circle">2</div>
+            <span>Reviewing sources</span>
+          </div>
+          <span class="step-separator">→</span>
+          <div class="step-node" id="stepChecking">
+            <div class="step-circle">3</div>
+            <span>Checking contacts</span>
+          </div>
+          <span class="step-separator">→</span>
+          <div class="step-node" id="stepReady">
+            <div class="step-circle">4</div>
+            <span>Ready</span>
+          </div>
+        </div>
+
+        <div id="bannerSuccess" class="banner-notification success hidden">
+          <i data-lucide="check-circle" style="width:16px;height:16px;"></i>
+          <span id="msgSuccessText">Search completed successfully.</span>
+        </div>
+        <div id="bannerError" class="banner-notification error hidden">
+          <i data-lucide="alert-circle" style="width:16px;height:16px;"></i>
+          <span id="msgErrorText">Search process encountered an issue.</span>
+        </div>
+
+        <!-- Technical Activity Disclosure -->
+        <div class="tech-log-wrapper">
+          <button type="button" class="disclosure-toggle" id="btnToggleTechLog" onclick="toggleTechLog()" aria-expanded="false">
+            <i data-lucide="chevron-down" style="width:13px;height:13px;"></i>
+            <span>Technical activity & execution logs</span>
+          </button>
+          <div id="terminalLogBox" class="tech-log-terminal hidden" aria-live="polite"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- VIEW 2: LEADS REVIEW & EXPORT                       -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <section id="viewLeads" class="hidden">
+      <div class="leads-bar">
+        <div>
+          <h2 class="page-title" style="font-size:22px;">Leads</h2>
+          <p class="page-description" id="labelLeadsSummarySubtitle">0 results discovered for your event</p>
+        </div>
+        <div class="leads-bar-actions">
+          <button type="button" class="btn-secondary" onclick="exportLeadsToCSV()" id="btnExportCSV">
+            <i data-lucide="download" style="width:14px;height:14px;"></i>
+            <span>Export CSV</span>
+          </button>
+          <a href="#" target="_blank" rel="noopener noreferrer" class="btn-secondary hidden" id="btnOpenSheetLink" style="color:var(--success);border-color:#C3E6D2;">
+            <i data-lucide="table" style="width:14px;height:14px;"></i>
             <span>Open in Google Sheets</span>
-            <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+            <i data-lucide="external-link" style="width:12px;height:12px;"></i>
           </a>
         </div>
       </div>
 
-      <!-- Filter Bar -->
-      <div class="p-4 bg-slate-950/50 border-b border-slate-800/80 flex flex-col sm:flex-row gap-3 items-center justify-between">
-        <div class="relative w-full sm:w-72">
-          <i data-lucide="search" class="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2"></i>
-          <input type="text" id="tableFilterInput" oninput="renderTable()" placeholder="Filter by org, name, role, email..." class="w-full bg-slate-900 border border-slate-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+      <!-- Filters Row -->
+      <div class="filter-controls-row">
+        <div class="search-box-wrap">
+          <i data-lucide="search" class="search-box-icon" style="width:14px;height:14px;"></i>
+          <input type="text" id="inputTableFilter" class="search-box-input" placeholder="Search organization, contact, location…" oninput="onFilterChanged()" aria-label="Filter results table" />
         </div>
-        <div class="flex flex-wrap items-center gap-2">
-          <div class="flex items-center bg-slate-900 border border-slate-800 rounded-lg p-0.5 text-xs">
-            <button onclick="setFilterCat('ALL')" id="fcAll" class="px-2 py-1 rounded-md bg-indigo-600 text-white">All Categories</button>
-            <button onclick="setFilterCat('Sponsor')" id="fcSponsor" class="px-2 py-1 rounded-md text-slate-400 hover:text-slate-200">Sponsors</button>
-            <button onclick="setFilterCat('College Delegation')" id="fcDel" class="px-2 py-1 rounded-md text-slate-400 hover:text-slate-200">Delegations</button>
-          </div>
-          <div class="flex items-center bg-slate-900 border border-slate-800 rounded-lg p-0.5 text-xs">
-            <button onclick="setFilterStatus('ALL')" id="fsAll" class="px-2 py-1 rounded-md bg-indigo-600 text-white">All Status</button>
-            <button onclick="setFilterStatus('Verified')" id="fsVerified" class="px-2 py-1 rounded-md text-slate-400 hover:text-slate-200">Verified</button>
-            <button onclick="setFilterStatus('Pattern-Derived')" id="fsDerived" class="px-2 py-1 rounded-md text-slate-400 hover:text-slate-200">Pattern-Derived</button>
-          </div>
+        <div class="pill-group" role="group" aria-label="Filter by Category">
+          <button type="button" class="pill-btn active" id="pillCatAll" onclick="setCategoryFilter('ALL')">All categories</button>
+          <button type="button" class="pill-btn" id="pillCatSponsor" onclick="setCategoryFilter('Sponsor')">Sponsors</button>
+          <button type="button" class="pill-btn" id="pillCatDelegation" onclick="setCategoryFilter('College Delegation')">Delegations</button>
+        </div>
+        <div class="pill-group" role="group" aria-label="Filter by Status">
+          <button type="button" class="pill-btn active" id="pillStatAll" onclick="setStatusFilter('ALL')">All statuses</button>
+          <button type="button" class="pill-btn" id="pillStatVerified" onclick="setStatusFilter('Verified')">Verified</button>
+          <button type="button" class="pill-btn" id="pillStatDerived" onclick="setStatusFilter('Pattern-Derived')">Inferred</button>
         </div>
       </div>
 
-      <!-- Table View -->
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="border-b border-slate-800 bg-slate-950/80 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-              <th class="py-3 px-4">Organization Name</th>
-              <th class="py-3 px-4">Category</th>
-              <th class="py-3 px-4">Location</th>
-              <th class="py-3 px-4">Contact Person</th>
-              <th class="py-3 px-4">Contact Channel</th>
-              <th class="py-3 px-4">Verification Status</th>
-            </tr>
-          </thead>
-          <tbody id="leadsTableBody" class="divide-y divide-slate-800/60 text-xs">
-            <tr>
-              <td colspan="6" class="py-12 text-center text-slate-500">
-                <div class="flex flex-col items-center justify-center gap-2">
-                  <i data-lucide="user-check" class="w-8 h-8 text-slate-600"></i>
-                  <p class="text-sm font-medium text-slate-400">No leads discovered yet</p>
-                  <p class="text-xs text-slate-500">Upload an event brochure PDF or enter a natural language search query above.</p>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <!-- Master Leads Roster Table -->
+      <div class="table-container">
+        <div class="table-scroll-area">
+          <table class="data-table" aria-label="Master Leads Roster">
+            <thead>
+              <tr>
+                <th>Organization</th>
+                <th>Type</th>
+                <th>Location</th>
+                <th>Best contact</th>
+                <th>Contact channel</th>
+                <th>Evidence</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tableLeadsBody">
+              <tr>
+                <td colspan="7">
+                  <div class="empty-placeholder">
+                    <i data-lucide="users" class="empty-icon" style="width:32px;height:32px;"></i>
+                    <div class="empty-title">No leads yet</div>
+                    <div class="empty-desc">Describe the sponsors or delegations you want to find to get started.</div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
+    </section>
 
   </main>
 
-  <footer class="border-t border-slate-800/80 py-6 text-center text-xs text-slate-500">
-    <p>Autonomous Lead Discovery & Verification Agent • Built with LangGraph & FastAPI • 100-Point Architecture</p>
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- LEAD DETAIL DRAWER (Section 5.D)                   -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="drawer-overlay" id="leadDetailDrawer" onclick="closeDetailDrawer(event)">
+    <div class="drawer-panel" onclick="event.stopPropagation()">
+      <div class="drawer-header">
+        <div class="drawer-heading-title" id="drawerLeadOrgName">Lead Details</div>
+        <button type="button" class="drawer-close-btn" onclick="hideDetailDrawer()" aria-label="Close detail panel">
+          <i data-lucide="x" style="width:16px;height:16px;"></i>
+        </button>
+      </div>
+      <div class="drawer-body">
+        <div>
+          <div class="detail-item-title">Category & Location</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+            <span id="drawerLeadCategoryBadge" class="badge-category sponsor">Sponsor</span>
+            <span id="drawerLeadLocation" style="font-size:13px;color:var(--text-secondary);">Bengaluru, India</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="detail-item-title">Contact Person & Role</div>
+          <div class="detail-item-value" id="drawerLeadPerson">Sarah Connor - VP Marketing</div>
+        </div>
+
+        <div>
+          <div class="detail-item-title">Deliverable Contact Channel</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+            <span class="detail-item-value" id="drawerLeadChannel">sarah.connor@acme.com</span>
+            <button type="button" class="icon-copy-btn" id="drawerCopyBtn" onclick="copyDrawerChannel()" aria-label="Copy channel">
+              <i data-lucide="copy" style="width:13px;height:13px;"></i>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <div class="detail-item-title">Verification Evidence & Confidence</div>
+          <div id="drawerEvidenceBox" class="evidence-box verified">
+            Confirmed deliverable mailbox via DNS MX resolution and non-intrusive SMTP handshake (250 OK).
+          </div>
+        </div>
+
+        <div>
+          <div class="detail-item-title">Event Outreach Note</div>
+          <div class="detail-item-value" style="font-size:13px;color:var(--text-secondary);font-weight:400;" id="drawerRelevanceNote">
+            Identified for IIT Kharagpur fest partnerships. Ready for student sponsorship team outreach.
+          </div>
+        </div>
+
+        <div>
+          <div class="detail-item-title">Outreach Status</div>
+          <button type="button" class="btn-secondary" id="drawerOutreachToggleBtn" onclick="toggleOutreachStatus()" style="margin-top:4px;">
+            <i data-lucide="clock" style="width:13px;height:13px;"></i>
+            <span id="drawerOutreachStatusLabel">Mark as Contacted</span>
+          </button>
+        </div>
+      </div>
+      <div class="drawer-footer">
+        <button type="button" class="btn-action-primary" style="flex:1;" onclick="copyDrawerChannel()">
+          <i data-lucide="copy" style="width:14px;height:14px;"></i>
+          <span>Copy Contact</span>
+        </button>
+        <button type="button" class="btn-secondary" onclick="hideDetailDrawer()">
+          <span>Done</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="app-footer">
+    <p>CQ Scraper · IIT Kharagpur Event Lead Discovery · LangGraph Multi-Stage Architecture</p>
   </footer>
 
-  <!-- Application Logic Script -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- CLIENT LOGIC: NATIVE JAVASCRIPT                     -->
+  <!-- ═══════════════════════════════════════════════════ -->
   <script>
-    let activeTab = 'prompt';
-    let selectedFile = null;
-    let categoryFocus = 'Both';
-    let isRunning = false;
-    let autoScroll = true;
-    let leadsData = [];
-    let deadCount = 0;
-    let filterCategory = 'ALL';
-    let filterStatus = 'ALL';
-    let currentEventSource = null;
+    // Application State
+    var currentTab = 'discovery';
+    var selectedCategory = 'Both';
+    var selectedBrochureFile = null;
+    var isRunning = false;
+    var allLeads = [];
+    var tableCategoryFilter = 'ALL';
+    var tableStatusFilter = 'ALL';
+    var activeEventSource = null;
+    var isBrochureOpen = false;
+    var isTechLogOpen = false;
+    var selectedLeadDetail = null;
+    var outreachRecords = {}; // maps channel -> boolean
 
-    function switchTab(tab) {
-      if (isRunning) return;
-      activeTab = tab;
-      const promptBtn = document.getElementById('tabPromptBtn');
-      const brochureBtn = document.getElementById('tabBrochureBtn');
-      const promptView = document.getElementById('promptView');
-      const brochureView = document.getElementById('brochureView');
-
-      if (tab === 'prompt') {
-        promptBtn.className = 'flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white shadow-md shadow-indigo-600/30';
-        brochureBtn.className = 'flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-800/60';
-        promptView.classList.remove('hidden');
-        brochureView.classList.add('hidden');
-      } else {
-        brochureBtn.className = 'flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white shadow-md shadow-indigo-600/30';
-        promptBtn.className = 'flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-800/60';
-        brochureView.classList.remove('hidden');
-        promptView.classList.add('hidden');
+    function refreshIcons() {
+      if (typeof lucide !== 'undefined' && lucide.createIcons) {
+        try { lucide.createIcons(); } catch (e) {}
       }
-      lucide.createIcons();
     }
 
-    function setPrompt(text) {
-      document.getElementById('searchPromptInput').value = text;
+    // ── Navigation ───────────────────────────────────────
+    function switchMainTab(tab) {
+      currentTab = tab;
+      document.getElementById('viewDiscovery').classList.toggle('hidden', tab !== 'discovery');
+      document.getElementById('viewLeads').classList.toggle('hidden', tab !== 'leads');
+      document.getElementById('tabNavDiscovery').classList.toggle('active', tab === 'discovery');
+      document.getElementById('tabNavLeads').classList.toggle('active', tab === 'leads');
+      if (tab === 'leads') {
+        renderLeadsTable();
+      }
+      refreshIcons();
     }
 
-    function setCategory(cat) {
-      categoryFocus = cat;
-      ['catBothBtn', 'catSponsorBtn', 'catDelBtn'].forEach(id => {
-        const btn = document.getElementById(id);
-        btn.className = 'py-1 px-2 text-xs font-medium rounded-md transition-all text-slate-400 hover:text-slate-200';
+    // ── Input Controls ───────────────────────────────────
+    function applySuggestion(text) {
+      document.getElementById('searchBriefInput').value = text;
+      document.getElementById('searchBriefInput').focus();
+    }
+
+    function selectCategory(cat) {
+      selectedCategory = cat;
+      ['btnCatBoth', 'btnCatSponsor', 'btnCatDelegation'].forEach(function(id) {
+        document.getElementById(id).classList.remove('active');
       });
-      if (cat === 'Both') document.getElementById('catBothBtn').className = 'py-1 px-2 text-xs font-medium rounded-md transition-all bg-indigo-600 text-white';
-      if (cat === 'Sponsor') document.getElementById('catSponsorBtn').className = 'py-1 px-2 text-xs font-medium rounded-md transition-all bg-indigo-600 text-white';
-      if (cat === 'College Delegation') document.getElementById('catDelBtn').className = 'py-1 px-2 text-xs font-medium rounded-md transition-all bg-indigo-600 text-white';
+      if (cat === 'Both') document.getElementById('btnCatBoth').classList.add('active');
+      if (cat === 'Sponsor') document.getElementById('btnCatSponsor').classList.add('active');
+      if (cat === 'College Delegation') document.getElementById('btnCatDelegation').classList.add('active');
     }
 
-    function handleFileSelect(e) {
+    function toggleBrochureUpload() {
+      isBrochureOpen = !isBrochureOpen;
+      var area = document.getElementById('brochureUploadArea');
+      var btn = document.getElementById('btnToggleBrochure');
+      area.classList.toggle('hidden', !isBrochureOpen);
+      btn.classList.toggle('open', isBrochureOpen);
+      btn.setAttribute('aria-expanded', isBrochureOpen);
+      refreshIcons();
+    }
+
+    function onBrochureSelected(e) {
       if (e.target.files && e.target.files.length > 0) {
-        selectedFile = e.target.files[0];
-        showFileBadge(selectedFile);
+        setBrochureFile(e.target.files[0]);
       }
     }
-
-    function handleDragOver(e) { e.preventDefault(); }
-    function handleDragLeave(e) { e.preventDefault(); }
-    function handleDrop(e) {
+    function onDragOver(e) { e.preventDefault(); e.currentTarget.style.borderColor = 'var(--action-primary)'; }
+    function onDragLeave(e) { e.preventDefault(); e.currentTarget.style.borderColor = ''; }
+    function onDropFile(e) {
       e.preventDefault();
+      e.currentTarget.style.borderColor = '';
       if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-        selectedFile = e.dataTransfer.files[0];
-        showFileBadge(selectedFile);
+        setBrochureFile(e.dataTransfer.files[0]);
       }
     }
-
-    function showFileBadge(file) {
+    function setBrochureFile(file) {
+      selectedBrochureFile = file;
       document.getElementById('dropzoneBox').classList.add('hidden');
-      const badge = document.getElementById('fileLoadedBadge');
+      var badge = document.getElementById('selectedFileBadge');
       badge.classList.remove('hidden');
-      document.getElementById('fileNameTxt').innerText = file.name;
-      const sizeKb = (file.size / 1024).toFixed(1);
-      document.getElementById('fileSizeTxt').innerText = `${sizeKb} KB • PDF Ready`;
-      lucide.createIcons();
+      document.getElementById('labelFileName').textContent = file.name;
+      document.getElementById('labelFileSize').textContent = (file.size / 1024).toFixed(1) + ' KB · PDF';
+      refreshIcons();
     }
-
-    function clearFile() {
-      selectedFile = null;
-      document.getElementById('brochureFileInput').value = '';
+    function clearSelectedFile() {
+      selectedBrochureFile = null;
+      document.getElementById('inputBrochureFile').value = '';
       document.getElementById('dropzoneBox').classList.remove('hidden');
-      document.getElementById('fileLoadedBadge').classList.add('hidden');
+      document.getElementById('selectedFileBadge').classList.add('hidden');
     }
 
-    function toggleAutoScroll() {
-      autoScroll = !autoScroll;
-      const btn = document.getElementById('toggleScrollBtn');
-      btn.innerText = `Auto-scroll: ${autoScroll ? 'ON' : 'OFF'}`;
-      btn.className = autoScroll
-        ? 'text-[11px] font-mono px-2 py-0.5 rounded border border-indigo-500/30 bg-slate-800 text-indigo-400'
-        : 'text-[11px] font-mono px-2 py-0.5 rounded border border-slate-800 bg-slate-900 text-slate-500';
+    function toggleTechLog() {
+      isTechLogOpen = !isTechLogOpen;
+      var box = document.getElementById('terminalLogBox');
+      var btn = document.getElementById('btnToggleTechLog');
+      box.classList.toggle('hidden', !isTechLogOpen);
+      btn.classList.toggle('open', isTechLogOpen);
+      btn.setAttribute('aria-expanded', isTechLogOpen);
+      if (isTechLogOpen) box.scrollTop = box.scrollHeight;
+      refreshIcons();
     }
 
-    async function startAgentRun() {
-      const promptVal = document.getElementById('searchPromptInput').value.trim();
-      const maxTargets = document.getElementById('maxTargetsSlider').value;
+    // ── Discovery Run Execution ──────────────────────────
+    function triggerDiscoveryRun() {
+      var prompt = document.getElementById('searchBriefInput').value.trim();
+      var hasPrompt = prompt.length > 0;
+      var hasBrochure = selectedBrochureFile !== null;
 
-      if (activeTab === 'prompt' && !promptVal) {
-        alert('Please enter a natural language search prompt or choose an example chip.');
-        return;
-      }
-      if (activeTab === 'brochure' && !selectedFile) {
-        alert('Please choose or drop an event brochure PDF.');
+      if (!hasPrompt && !hasBrochure) {
+        document.getElementById('searchBriefInput').focus();
         return;
       }
 
       isRunning = true;
-      document.getElementById('startRunBtn').disabled = true;
-      document.getElementById('startRunBtn').innerHTML = `<span class="inline-block animate-spin mr-2"><i data-lucide="loader-2" class="w-4 h-4"></i></span> Running Pipeline...`;
-      document.getElementById('runStatusBadge').innerText = 'Running';
-      document.getElementById('runStatusBadge').className = 'text-xs px-2 py-0.5 rounded-full font-medium bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 animate-pulse';
-      document.getElementById('resetSessionBtn').classList.remove('hidden');
-      lucide.createIcons();
+      allLeads = [];
+      updateLeadsCounter();
 
-      // Reset data
-      leadsData = [];
-      deadCount = 0;
-      updateStats();
-      document.getElementById('terminalBody').innerHTML = '';
+      // UI state transition
+      var runBtn = document.getElementById('btnFindLeads');
+      runBtn.disabled = true;
+      runBtn.innerHTML = '<i data-lucide="loader-2" style="width:14px;height:14px;animation:spin 1s linear infinite;"></i><span>Searching…</span>';
+      document.getElementById('cardRunningJob').classList.remove('hidden');
+      document.getElementById('bannerSuccess').classList.add('hidden');
+      document.getElementById('bannerError').classList.add('hidden');
+      document.getElementById('terminalLogBox').innerHTML = '';
+      resetWorkflowSteps();
+      setWorkflowStep(0);
 
-      const formData = new FormData();
-      if (activeTab === 'prompt' && promptVal) formData.append('search_prompt', promptVal);
-      if (activeTab === 'brochure' && selectedFile) formData.append('brochure', selectedFile);
-      formData.append('category_focus', categoryFocus);
-      formData.append('max_targets', maxTargets);
+      var formData = new FormData();
+      if (hasPrompt) formData.append('search_prompt', prompt);
+      if (hasBrochure) formData.append('brochure', selectedBrochureFile);
+      formData.append('category_focus', selectedCategory);
+      formData.append('max_targets', '10');
 
-      try {
-        const res = await fetch('/api/run', { method: 'POST', body: formData });
-        if (!res.ok) {
-          const errData = await res.json().catch(() => ({ detail: 'API Error' }));
-          throw new Error(errData.detail || 'Failed to start run');
-        }
-        const data = await res.json();
-        connectSSE(data.session_id);
-      } catch (err) {
-        appendLog({ level: 'ERROR', message: 'Failed to launch agent: ' + err.message });
-        setRunComplete();
-      }
+      fetch('/api/run', { method: 'POST', body: formData })
+        .then(function(res) {
+          if (!res.ok) {
+            return res.json().then(function(d) { throw new Error(d.detail || 'Server error'); });
+          }
+          return res.json();
+        })
+        .then(function(data) {
+          appendTechLog('info', 'run', 'Session initiated: ' + data.session_id);
+          subscribeToEvents(data.session_id);
+        })
+        .catch(function(err) {
+          appendTechLog('error', 'run', 'Failed: ' + err.message);
+          onRunError(err.message);
+        });
+      refreshIcons();
     }
 
-    function connectSSE(sessionId) {
-      if (currentEventSource) currentEventSource.close();
-      const es = new EventSource(`/api/stream/${sessionId}`);
-      currentEventSource = es;
+    function subscribeToEvents(sessionId) {
+      if (activeEventSource) activeEventSource.close();
+      var es = new EventSource('/api/stream/' + sessionId);
+      activeEventSource = es;
 
-      es.addEventListener('session_start', (e) => {
-        const d = JSON.parse(e.data);
-        appendLog({ level: 'INFO', node: 'init', message: `Session started [${sessionId}]` });
+      es.addEventListener('session_start', function() {
+        appendTechLog('info', 'session', 'Started autonomous pipeline stream');
       });
 
-      es.addEventListener('node_start', (e) => {
-        const d = JSON.parse(e.data);
-        const node = d.data?.node;
-        if (node) updateStepper(node);
+      es.addEventListener('node_start', function(e) {
+        var d = JSON.parse(e.data);
+        if (d.data && d.data.node) {
+          handleGraphNodeEvent(d.data.node);
+        }
       });
 
-      es.addEventListener('log', (e) => {
-        const d = JSON.parse(e.data);
-        appendLog(d.data || d);
+      es.addEventListener('log', function(e) {
+        var d = JSON.parse(e.data);
+        var log = d.data || d;
+        appendTechLog((log.level || 'info').toLowerCase(), log.node || 'agent', log.message || '');
       });
 
-      es.addEventListener('lead_found', (e) => {
-        const d = JSON.parse(e.data);
+      es.addEventListener('lead_found', function(e) {
+        var d = JSON.parse(e.data);
         if (d.data) {
-          const channel = d.data.contact_channel || d.data['Contact Channel'];
-          if (!leadsData.some(l => (l.contact_channel || l['Contact Channel']) === channel)) {
-            leadsData.push(d.data);
-            updateStats();
-            renderTable();
+          var lead = d.data;
+          var channel = lead.contact_channel || lead['Contact Channel'];
+          var exists = allLeads.some(function(l) {
+            return (l.contact_channel || l['Contact Channel']) === channel;
+          });
+          if (!exists) {
+            allLeads.push(lead);
+            updateLeadsCounter();
+            renderLeadsTable();
           }
         }
       });
 
-      es.addEventListener('sheet_synced', (e) => {
-        const d = JSON.parse(e.data);
-        if (d.data?.google_sheet_url) {
-          displaySheetUrl(d.data.google_sheet_url);
+      es.addEventListener('sheet_synced', function(e) {
+        var d = JSON.parse(e.data);
+        if (d.data && d.data.google_sheet_url) {
+          showGoogleSheetCTA(d.data.google_sheet_url);
         }
       });
 
-      es.addEventListener('complete', (e) => {
-        const d = JSON.parse(e.data);
-        if (d.data?.google_sheet_url) displaySheetUrl(d.data.google_sheet_url);
-        setRunComplete();
+      es.addEventListener('complete', function(e) {
+        var d = JSON.parse(e.data);
+        if (d.data && d.data.google_sheet_url) {
+          showGoogleSheetCTA(d.data.google_sheet_url);
+        }
+        onRunComplete();
         es.close();
       });
 
-      es.addEventListener('error', (e) => {
-        // Fallback status check
-        fetch(`/api/status/${sessionId}`).then(r => r.json()).then(st => {
-          if (st.is_complete) {
-            if (st.google_sheet_url) displaySheetUrl(st.google_sheet_url);
-            setRunComplete();
-            es.close();
-          }
-        }).catch(() => {});
+      es.addEventListener('error', function() {
+        fetch('/api/status/' + sessionId)
+          .then(function(r) { return r.json(); })
+          .then(function(st) {
+            if (st.is_complete) {
+              if (st.google_sheet_url) showGoogleSheetCTA(st.google_sheet_url);
+              onRunComplete();
+              es.close();
+            }
+          })
+          .catch(function() {});
       });
     }
 
-    function updateStepper(node) {
-      const stepMap = {
-        'parse_input': 0,
-        'expand_targets': 1, 'search_web': 1, 'social_dork_search': 1,
-        'crawl_page': 2, 'dead_link_recovery': 2,
-        'extract_decision_maker': 3, 'verify_contact': 3,
-        'sync_sheet': 4
+    function handleGraphNodeEvent(node) {
+      var stepMapping = {
+        'parse_input': 0, 'expand_targets': 0, 'search_web': 0,
+        'crawl_page': 1, 'dead_link_recovery': 1,
+        'extract_decision_maker': 2, 'social_dork_search': 2, 'verify_contact': 2,
+        'sync_sheet': 3
       };
-      const activeIdx = stepMap[node] ?? -1;
-
-      if (node === 'dead_link_recovery') {
-        deadCount++;
-        document.getElementById('statDead').innerText = deadCount;
-        document.getElementById('deadAlertBox').classList.remove('hidden');
-        lucide.createIcons();
+      var targetStep = stepMapping[node];
+      if (targetStep !== undefined) {
+        setWorkflowStep(targetStep);
       }
 
-      for (let i = 0; i < 5; i++) {
-        const el = document.getElementById(`step-${i}`);
-        const tag = el.querySelector('.status-tag');
-        if (i < activeIdx) {
-          el.className = 'flex items-center gap-3 p-3 rounded-xl border border-emerald-500/20 bg-slate-950/60 text-slate-300';
-          tag.innerText = 'DONE';
-          tag.className = 'status-tag text-[10px] font-mono text-emerald-400';
-        } else if (i === activeIdx) {
-          el.className = 'flex items-center gap-3 p-3 rounded-xl border border-indigo-500/40 bg-indigo-500/10 text-slate-100 shadow-sm';
-          tag.innerText = 'ACTIVE';
-          tag.className = 'status-tag text-[10px] font-mono text-indigo-400 animate-pulse';
+      var labels = {
+        'parse_input': 'Analyzing event search brief…',
+        'expand_targets': 'Generating target organizations…',
+        'search_web': 'Searching Google and web directories…',
+        'crawl_page': 'Extracting leadership and contact details from pages…',
+        'dead_link_recovery': 'Handling unreachable page — pivoting to alternate queries…',
+        'extract_decision_maker': 'Identifying relevant decision-makers…',
+        'social_dork_search': 'Validating personal social profiles…',
+        'verify_contact': 'Verifying deliverability via DNS MX and SMTP socket handshakes…',
+        'sync_sheet': 'Syncing verified rows into Google Sheets…'
+      };
+      if (labels[node]) {
+        document.getElementById('labelProgressStatus').textContent = labels[node];
+      }
+    }
+
+    function resetWorkflowSteps() {
+      ['stepSearching', 'stepReviewing', 'stepChecking', 'stepReady'].forEach(function(id) {
+        var el = document.getElementById(id);
+        el.className = 'step-node';
+      });
+    }
+
+    function setWorkflowStep(index) {
+      var stepIds = ['stepSearching', 'stepReviewing', 'stepChecking', 'stepReady'];
+      for (var i = 0; i < stepIds.length; i++) {
+        var el = document.getElementById(stepIds[i]);
+        if (i < index) {
+          el.className = 'step-node done';
+        } else if (i === index) {
+          el.className = 'step-node active';
         } else {
-          el.className = 'flex items-center gap-3 p-3 rounded-xl border border-slate-800/80 bg-slate-950/30 text-slate-500';
-          tag.innerText = '';
+          el.className = 'step-node';
         }
       }
     }
 
-    function appendLog(log) {
-      const body = document.getElementById('terminalBody');
-      const placeholder = document.getElementById('terminalPlaceholder');
-      if (placeholder) placeholder.remove();
+    function appendTechLog(level, node, msg) {
+      if (!msg) return;
+      var box = document.getElementById('terminalLogBox');
+      var line = document.createElement('div');
+      line.className = 'tech-log-line';
+      var time = new Date().toLocaleTimeString([], { hour12: false });
+      var msgClass = 'tech-log-msg';
+      if (level === 'error') msgClass += ' error';
+      else if (level === 'warn') msgClass += ' warn';
+      else if (msg.indexOf('VERIFIED') >= 0 || msg.indexOf('Deliverable') >= 0) msgClass += ' success';
 
-      const time = new Date().toLocaleTimeString([], { hour12: false });
-      const lvl = (log.level || 'INFO').toUpperCase();
-      const node = log.node ? `[${log.node}]` : '';
-      let colorClass = 'text-slate-300';
-      if (lvl.includes('ERR')) colorClass = 'text-rose-400 font-semibold';
-      else if (lvl.includes('WARN')) colorClass = 'text-amber-400 font-medium';
-      else if (log.message?.includes('VERIFIED LEAD')) colorClass = 'text-emerald-400 font-medium';
-
-      const line = document.createElement('div');
-      line.className = 'flex items-start gap-2.5 text-slate-300 hover:bg-slate-900/40 px-1.5 py-0.5 rounded transition-colors';
-      line.innerHTML = `
-        <span class="text-slate-500 shrink-0 text-[11px]">[${time}]</span>
-        ${node ? `<span class="text-blue-400/90 shrink-0 text-xs">${node}</span>` : ''}
-        <span class="break-words ${colorClass}">${log.message || ''}</span>
-      `;
-      body.appendChild(line);
-
-      if (autoScroll) {
-        body.scrollTop = body.scrollHeight;
-      }
+      line.innerHTML = '<span class="tech-log-time">[' + time + ']</span>' +
+        '<span class="tech-log-node">[' + node + ']</span>' +
+        '<span class="' + msgClass + '">' + escapeHtml(msg) + '</span>';
+      box.appendChild(line);
+      if (isTechLogOpen) box.scrollTop = box.scrollHeight;
     }
 
-    function updateStats() {
-      const found = leadsData.length;
-      const verified = leadsData.filter(l => (l['Verification Status'] || l.verification_status) === 'Verified').length;
-      const derived = leadsData.filter(l => (l['Verification Status'] || l.verification_status) === 'Pattern-Derived').length;
-
-      document.getElementById('statFound').innerText = found;
-      document.getElementById('statVerified').innerText = verified;
-      document.getElementById('statDerived').innerText = derived;
-      document.getElementById('leadCountBadge').innerText = `${found} leads`;
-    }
-
-    function displaySheetUrl(url) {
-      const container = document.getElementById('sheetSyncContainer');
-      container.innerHTML = `
-        <a href="${url}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-1.5 w-full py-1.5 px-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold shadow-md transition-all active:scale-[0.98]">
-          <span>Open in Sheets</span>
-          <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-        </a>
-      `;
-
-      const navBtn = document.getElementById('liveSheetNavBtn');
-      document.getElementById('navSheetLink').href = url;
-      navBtn.classList.remove('hidden');
-
-      const tableCta = document.getElementById('tableSheetCta');
-      document.getElementById('tableSheetLink').href = url;
-      tableCta.classList.remove('hidden');
-
-      lucide.createIcons();
-    }
-
-    function setRunComplete() {
+    function onRunComplete() {
       isRunning = false;
-      document.getElementById('startRunBtn').disabled = false;
-      document.getElementById('startRunBtn').innerHTML = `<i data-lucide="play" class="w-4 h-4 fill-current"></i><span>Start Autonomous Discovery & Extraction</span>`;
-      document.getElementById('runStatusBadge').innerText = 'Completed';
-      document.getElementById('runStatusBadge').className = 'text-xs px-2 py-0.5 rounded-full font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/30';
-
-      for (let i = 0; i < 5; i++) {
-        const el = document.getElementById(`step-${i}`);
-        const tag = el.querySelector('.status-tag');
-        el.className = 'flex items-center gap-3 p-3 rounded-xl border border-emerald-500/20 bg-slate-950/60 text-slate-300';
-        tag.innerText = 'DONE';
-        tag.className = 'status-tag text-[10px] font-mono text-emerald-400';
-      }
-      lucide.createIcons();
+      var runBtn = document.getElementById('btnFindLeads');
+      runBtn.disabled = false;
+      runBtn.innerHTML = '<i data-lucide="search" style="width:15px;height:15px;"></i><span>Find leads</span>';
+      setWorkflowStep(3);
+      document.getElementById('labelProgressStatus').textContent = 'Discovery completed';
+      var count = allLeads.length;
+      document.getElementById('labelProgressSubtext').textContent = count + ' actionable lead' + (count === 1 ? '' : 's') + ' found and verified for your event.';
+      var banner = document.getElementById('bannerSuccess');
+      document.getElementById('msgSuccessText').textContent = 'Search complete. ' + count + ' lead' + (count === 1 ? '' : 's') + ' added to Leads roster.';
+      banner.classList.remove('hidden');
+      refreshIcons();
     }
 
-    function renderTable() {
-      const search = document.getElementById('tableFilterInput').value.toLowerCase();
-      const body = document.getElementById('leadsTableBody');
+    function onRunError(msg) {
+      isRunning = false;
+      var runBtn = document.getElementById('btnFindLeads');
+      runBtn.disabled = false;
+      runBtn.innerHTML = '<i data-lucide="search" style="width:15px;height:15px;"></i><span>Find leads</span>';
+      document.getElementById('labelProgressStatus').textContent = 'Search halted';
+      document.getElementById('msgErrorText').textContent = msg || 'Could not complete discovery.';
+      document.getElementById('bannerError').classList.remove('hidden');
+      refreshIcons();
+    }
 
-      const filtered = leadsData.filter(l => {
-        const org = (l['Organization Name'] || l.organization_name || '').toLowerCase();
-        const cat = l['Category'] || l.category || 'Sponsor';
-        const loc = (l['Location'] || l.location || '').toLowerCase();
-        const person = (l['Contact Person'] || l.contact_person || '').toLowerCase();
-        const channel = (l['Contact Channel'] || l.contact_channel || '').toLowerCase();
-        const status = l['Verification Status'] || l.verification_status || 'Verified';
+    function updateLeadsCounter() {
+      var count = allLeads.length;
+      document.getElementById('badgeFoundCounter').textContent = count + ' leads discovered';
+      document.getElementById('navLeadsCountBadge').textContent = count;
+      document.getElementById('labelLeadsSummarySubtitle').textContent = count + ' lead' + (count === 1 ? '' : 's') + ' discovered for your event';
+    }
 
-        const matchSearch = !search || org.includes(search) || person.includes(search) || channel.includes(search) || loc.includes(search);
-        const matchCat = filterCategory === 'ALL' || cat === filterCategory;
-        const matchStat = filterStatus === 'ALL' || status === filterStatus;
+    function showGoogleSheetCTA(url) {
+      var btn = document.getElementById('btnOpenSheetLink');
+      btn.href = url;
+      btn.classList.remove('hidden');
+      refreshIcons();
+    }
 
-        return matchSearch && matchCat && matchStat;
+    // ── Table Rendering & Filtering ──────────────────────
+    function renderLeadsTable() {
+      var search = (document.getElementById('inputTableFilter').value || '').toLowerCase();
+      var tbody = document.getElementById('tableLeadsBody');
+
+      var filtered = allLeads.filter(function(l) {
+        var org = (l['Organization Name'] || l.organization_name || '').toLowerCase();
+        var cat = l['Category'] || l.category || 'Sponsor';
+        var loc = (l['Location'] || l.location || '').toLowerCase();
+        var person = (l['Contact Person'] || l.contact_person || '').toLowerCase();
+        var channel = (l['Contact Channel'] || l.contact_channel || '').toLowerCase();
+        var status = l['Verification Status'] || l.verification_status || 'Verified';
+
+        var matchSearch = !search || org.indexOf(search) >= 0 || loc.indexOf(search) >= 0 || person.indexOf(search) >= 0 || channel.indexOf(search) >= 0;
+        var matchCat = tableCategoryFilter === 'ALL' || cat === tableCategoryFilter;
+        var matchStatus = tableStatusFilter === 'ALL' || status === tableStatusFilter;
+
+        return matchSearch && matchCat && matchStatus;
       });
 
       if (filtered.length === 0) {
-        body.innerHTML = `
-          <tr>
-            <td colspan="6" class="py-12 text-center text-slate-500">
-              <div class="flex flex-col items-center justify-center gap-2">
-                <i data-lucide="user-check" class="w-8 h-8 text-slate-600"></i>
-                <p class="text-sm font-medium text-slate-400">${leadsData.length === 0 ? 'No leads discovered yet' : 'No leads match filter'}</p>
-                <p class="text-xs text-slate-500">${leadsData.length === 0 ? 'Upload brochure or run prompt to begin.' : 'Try adjusting your search criteria.'}</p>
-              </div>
-            </td>
-          </tr>
-        `;
-        lucide.createIcons();
+        var emptyTitle = allLeads.length === 0 ? 'No leads yet' : 'No matching leads';
+        var emptyDesc = allLeads.length === 0
+          ? 'Describe the sponsors or delegations you want to find to get started.'
+          : 'Try adjusting your search criteria or clearing active filters.';
+        tbody.innerHTML = '<tr><td colspan="7"><div class="empty-placeholder">' +
+          '<i data-lucide="users" class="empty-icon" style="width:28px;height:28px;"></i>' +
+          '<div class="empty-title">' + emptyTitle + '</div>' +
+          '<div class="empty-desc">' + emptyDesc + '</div></div></td></tr>';
+        refreshIcons();
         return;
       }
 
-      body.innerHTML = filtered.map(l => {
-        const org = l['Organization Name'] || l.organization_name || '';
-        const cat = l['Category'] || l.category || 'Sponsor';
-        const loc = l['Location'] || l.location || '';
-        const person = l['Contact Person'] || l.contact_person || '';
-        const channel = l['Contact Channel'] || l.contact_channel || '';
-        const status = l['Verification Status'] || l.verification_status || 'Verified';
-        const isUrl = channel.startsWith('http://') || channel.startsWith('https://');
+      tbody.innerHTML = filtered.map(function(l, idx) {
+        var org = l['Organization Name'] || l.organization_name || '';
+        var cat = l['Category'] || l.category || 'Sponsor';
+        var loc = l['Location'] || l.location || '';
+        var person = l['Contact Person'] || l.contact_person || '';
+        var channel = l['Contact Channel'] || l.contact_channel || '';
+        var status = l['Verification Status'] || l.verification_status || 'Verified';
 
-        const catBadge = cat === 'Sponsor'
-          ? `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-teal-500/10 text-teal-400 border border-teal-500/20">Sponsor</span>`
-          : `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-violet-500/10 text-violet-400 border border-violet-500/20">College Delegation</span>`;
+        var catClass = cat === 'Sponsor' ? 'sponsor' : 'delegation';
+        var statusClass = status === 'Verified' ? 'verified' : 'derived';
+        var statusLabel = status === 'Verified' ? 'Verified' : 'Inferred';
 
-        const statusBadge = status === 'Verified'
-          ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"><i data-lucide="check" class="w-3 h-3 text-emerald-400"></i><span>Verified</span></span>`
-          : `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20"><i data-lucide="sparkles" class="w-3 h-3 text-amber-400"></i><span>Pattern-Derived</span></span>`;
+        var isUrl = channel.indexOf('http://') === 0 || channel.indexOf('https://') === 0;
+        var channelHtml = '';
+        if (isUrl) {
+          channelHtml = '<div class="channel-cell"><a href="' + escapeHtml(channel) + '" target="_blank" rel="noopener noreferrer" class="channel-link" onclick="event.stopPropagation()">' + escapeHtml(channel) + '</a>' +
+            '<i data-lucide="external-link" style="width:11px;height:11px;color:var(--text-muted);flex-shrink:0;"></i></div>';
+        } else {
+          channelHtml = '<div class="channel-cell"><span class="channel-link" style="color:var(--text-primary);cursor:default;">' + escapeHtml(channel) + '</span>' +
+            '<button type="button" class="icon-copy-btn" onclick="event.stopPropagation(); copyToClipboard(this, \'' + channel.replace(/'/g, "\\'") + '\')" aria-label="Copy email">' +
+            '<i data-lucide="copy" style="width:12px;height:12px;"></i></button></div>';
+        }
 
-        const channelContent = isUrl
-          ? `<a href="${channel}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-indigo-400 hover:text-indigo-300 hover:underline max-w-[210px] truncate" title="${channel}"><span class="truncate">${channel}</span><i data-lucide="external-link" class="w-3 h-3 shrink-0"></i></a>`
-          : `<div class="flex items-center gap-1.5 text-slate-300"><span class="truncate max-w-[180px]" title="${channel}">${channel}</span><button onclick="navigator.clipboard.writeText('${channel}'); this.innerHTML='✓'; setTimeout(()=>this.innerHTML='<i data-lucide=\\'copy\\' class=\\'w-3 h-3\\'></i>', 1500);" class="p-1 hover:text-white text-slate-500 rounded"><i data-lucide="copy" class="w-3 h-3"></i></button></div>`;
+        var isContacted = !!outreachRecords[channel];
+        var outreachBadge = isContacted
+          ? '<span style="font-size:11px;color:var(--success);font-weight:600;display:inline-flex;align-items:center;gap:3px;"><i data-lucide="check" style="width:11px;height:11px;"></i>Contacted</span>'
+          : '<button type="button" class="btn-row-action" onclick="event.stopPropagation(); showLeadDetailByIdx(' + idx + ')">View details</button>';
 
-        return `
-          <tr class="hover:bg-slate-800/40 transition-colors">
-            <td class="py-3 px-4 font-semibold text-slate-100">
-              <div class="flex items-center gap-2">
-                <i data-lucide="building-2" class="w-3.5 h-3.5 text-slate-500 shrink-0"></i>
-                <span class="truncate max-w-[200px]" title="${org}">${org}</span>
-              </div>
-            </td>
-            <td class="py-3 px-4">${catBadge}</td>
-            <td class="py-3 px-4 text-slate-300">
-              <div class="flex items-center gap-1.5">
-                <i data-lucide="map-pin" class="w-3 h-3 text-slate-500 shrink-0"></i>
-                <span>${loc || 'India'}</span>
-              </div>
-            </td>
-            <td class="py-3 px-4 font-medium text-slate-200">
-              <span class="truncate max-w-[220px] inline-block" title="${person}">${person}</span>
-            </td>
-            <td class="py-3 px-4 font-mono text-[13px]">${channelContent}</td>
-            <td class="py-3 px-4">${statusBadge}</td>
-          </tr>
-        `;
+        return '<tr onclick="showLeadDetailByIdx(' + idx + ')">' +
+          '<td style="font-weight:600;">' + escapeHtml(org) + '</td>' +
+          '<td><span class="badge-category ' + catClass + '">' + escapeHtml(cat) + '</span></td>' +
+          '<td style="color:var(--text-secondary);">' + escapeHtml(loc || 'India') + '</td>' +
+          '<td style="font-weight:500;">' + escapeHtml(person) + '</td>' +
+          '<td>' + channelHtml + '</td>' +
+          '<td><span class="badge-status ' + statusClass + '">' +
+            (status === 'Verified' ? '<i data-lucide="check" style="width:11px;height:11px;"></i>' : '<i data-lucide="info" style="width:11px;height:11px;"></i>') +
+            escapeHtml(statusLabel) + '</span></td>' +
+          '<td style="text-align:right;">' + outreachBadge + '</td>' +
+          '</tr>';
       }).join('');
 
-      lucide.createIcons();
+      refreshIcons();
     }
 
-    function setFilterCat(cat) {
-      filterCategory = cat;
-      ['fcAll', 'fcSponsor', 'fcDel'].forEach(id => {
-        document.getElementById(id).className = 'px-2 py-1 rounded-md text-slate-400 hover:text-slate-200';
+    function onFilterChanged() {
+      renderLeadsTable();
+    }
+
+    function setCategoryFilter(cat) {
+      tableCategoryFilter = cat;
+      ['pillCatAll', 'pillCatSponsor', 'pillCatDelegation'].forEach(function(id) {
+        document.getElementById(id).classList.remove('active', 'sponsor', 'delegation');
       });
-      if (cat === 'ALL') document.getElementById('fcAll').className = 'px-2 py-1 rounded-md bg-indigo-600 text-white';
-      if (cat === 'Sponsor') document.getElementById('fcSponsor').className = 'px-2 py-1 rounded-md bg-teal-600 text-white';
-      if (cat === 'College Delegation') document.getElementById('fcDel').className = 'px-2 py-1 rounded-md bg-violet-600 text-white';
-      renderTable();
+      if (cat === 'ALL') document.getElementById('pillCatAll').classList.add('active');
+      if (cat === 'Sponsor') document.getElementById('pillCatSponsor').classList.add('active', 'sponsor');
+      if (cat === 'College Delegation') document.getElementById('pillCatDelegation').classList.add('active', 'delegation');
+      renderLeadsTable();
     }
 
-    function setFilterStatus(st) {
-      filterStatus = st;
-      ['fsAll', 'fsVerified', 'fsDerived'].forEach(id => {
-        document.getElementById(id).className = 'px-2 py-1 rounded-md text-slate-400 hover:text-slate-200';
+    function setStatusFilter(stat) {
+      tableStatusFilter = stat;
+      ['pillStatAll', 'pillStatVerified', 'pillStatDerived'].forEach(function(id) {
+        document.getElementById(id).classList.remove('active');
       });
-      if (st === 'ALL') document.getElementById('fsAll').className = 'px-2 py-1 rounded-md bg-indigo-600 text-white';
-      if (st === 'Verified') document.getElementById('fsVerified').className = 'px-2 py-1 rounded-md bg-emerald-600 text-white';
-      if (st === 'Pattern-Derived') document.getElementById('fsDerived').className = 'px-2 py-1 rounded-md bg-amber-600 text-white';
-      renderTable();
+      if (stat === 'ALL') document.getElementById('pillStatAll').classList.add('active');
+      if (stat === 'Verified') document.getElementById('pillStatVerified').classList.add('active');
+      if (stat === 'Pattern-Derived') document.getElementById('pillStatDerived').classList.add('active');
+      renderLeadsTable();
     }
 
-    function resetDashboard() {
-      if (currentEventSource) currentEventSource.close();
-      isRunning = false;
-      leadsData = [];
-      deadCount = 0;
-      updateStats();
-      renderTable();
-      document.getElementById('terminalBody').innerHTML = '<div class="text-slate-600 italic py-8 text-center" id="terminalPlaceholder">Agent idle. Submit a search prompt or brochure to initiate live stream.</div>';
-      document.getElementById('runStatusBadge').innerText = 'Idle';
-      document.getElementById('runStatusBadge').className = 'text-xs px-2 py-0.5 rounded-full font-medium bg-slate-800 text-slate-300';
-      document.getElementById('resetSessionBtn').classList.add('hidden');
-      document.getElementById('sheetSyncContainer').innerHTML = '<div class="flex items-center gap-1.5 text-xs text-slate-400"><span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span><span>Awaiting run</span></div>';
-      document.getElementById('liveSheetNavBtn').classList.add('hidden');
-      document.getElementById('tableSheetCta').classList.add('hidden');
-      document.getElementById('deadAlertBox').classList.add('hidden');
+    // ── Lead Detail Drawer Logic (Section 5.D) ────────────
+    function showLeadDetailByIdx(index) {
+      var lead = allLeads[index];
+      if (!lead) return;
+      selectedLeadDetail = lead;
 
-      for (let i = 0; i < 5; i++) {
-        const el = document.getElementById(`step-${i}`);
-        el.className = 'flex items-center gap-3 p-3 rounded-xl border border-slate-800/80 bg-slate-950/30 text-slate-500';
-        el.querySelector('.status-tag').innerText = '';
+      var org = lead['Organization Name'] || lead.organization_name || '';
+      var cat = lead['Category'] || lead.category || 'Sponsor';
+      var loc = lead['Location'] || lead.location || 'India';
+      var person = lead['Contact Person'] || lead.contact_person || '';
+      var channel = lead['Contact Channel'] || lead.contact_channel || '';
+      var status = lead['Verification Status'] || lead.verification_status || 'Verified';
+
+      document.getElementById('drawerLeadOrgName').textContent = org;
+      var catBadge = document.getElementById('drawerLeadCategoryBadge');
+      catBadge.textContent = cat;
+      catBadge.className = 'badge-category ' + (cat === 'Sponsor' ? 'sponsor' : 'delegation');
+      document.getElementById('drawerLeadLocation').textContent = loc;
+      document.getElementById('drawerLeadPerson').textContent = person;
+      document.getElementById('drawerLeadChannel').textContent = channel;
+
+      var evidenceBox = document.getElementById('drawerEvidenceBox');
+      if (status === 'Verified') {
+        evidenceBox.className = 'evidence-box verified';
+        evidenceBox.innerHTML = '<strong>Verified Deliverable:</strong> Confirmed direct mailbox via DNS MX resolution and non-intrusive SMTP handshake (250 OK) or authentic active profile.';
+      } else {
+        evidenceBox.className = 'evidence-box derived';
+        evidenceBox.innerHTML = '<strong>Inferred via Domain Pattern:</strong> Synthesized via corporate email naming pattern supported by ≥2 observed domain emails. Recommended for human review before outreach.';
       }
-      lucide.createIcons();
+
+      var isContacted = !!outreachRecords[channel];
+      updateDrawerOutreachBtn(isContacted);
+
+      document.getElementById('leadDetailDrawer').classList.add('open');
+      refreshIcons();
     }
 
-    // Initialize Lucide icons on load
-    document.addEventListener('DOMContentLoaded', () => {
-      lucide.createIcons();
+    function hideDetailDrawer() {
+      document.getElementById('leadDetailDrawer').classList.remove('open');
+      selectedLeadDetail = null;
+    }
+
+    function closeDetailDrawer(e) {
+      if (e.target.id === 'leadDetailDrawer') {
+        hideDetailDrawer();
+      }
+    }
+
+    function toggleOutreachStatus() {
+      if (!selectedLeadDetail) return;
+      var channel = selectedLeadDetail['Contact Channel'] || selectedLeadDetail.contact_channel || '';
+      outreachRecords[channel] = !outreachRecords[channel];
+      updateDrawerOutreachBtn(outreachRecords[channel]);
+      renderLeadsTable();
+    }
+
+    function updateDrawerOutreachBtn(isContacted) {
+      var label = document.getElementById('drawerOutreachStatusLabel');
+      var btn = document.getElementById('drawerOutreachToggleBtn');
+      if (isContacted) {
+        label.textContent = 'Status: Contacted (Click to undo)';
+        btn.style.color = 'var(--success)';
+        btn.style.borderColor = '#C3E6D2';
+      } else {
+        label.textContent = 'Mark as Contacted';
+        btn.style.color = '';
+        btn.style.borderColor = '';
+      }
+    }
+
+    function copyDrawerChannel() {
+      if (!selectedLeadDetail) return;
+      var channel = selectedLeadDetail['Contact Channel'] || selectedLeadDetail.contact_channel || '';
+      copyToClipboard(document.getElementById('drawerCopyBtn'), channel);
+    }
+
+    function copyToClipboard(btn, text) {
+      if (!navigator.clipboard) return;
+      navigator.clipboard.writeText(text).then(function() {
+        if (btn) {
+          btn.innerHTML = '<i data-lucide="check" style="width:12px;height:12px;color:var(--success);"></i>';
+          refreshIcons();
+          setTimeout(function() {
+            btn.innerHTML = '<i data-lucide="copy" style="width:12px;height:12px;"></i>';
+            refreshIcons();
+          }, 1500);
+        }
+      });
+    }
+
+    // ── Client-side CSV Export ────────────────────────────
+    function exportLeadsToCSV() {
+      if (allLeads.length === 0) {
+        alert('No leads to export yet. Please run a discovery query first.');
+        return;
+      }
+      var headers = ["Organization Name", "Category", "Location", "Contact Person", "Contact Channel", "Verification Status"];
+      var csvRows = [headers.join(",")];
+
+      allLeads.forEach(function(l) {
+        var row = [
+          escapeCSV(l['Organization Name'] || l.organization_name || ''),
+          escapeCSV(l['Category'] || l.category || 'Sponsor'),
+          escapeCSV(l['Location'] || l.location || ''),
+          escapeCSV(l['Contact Person'] || l.contact_person || ''),
+          escapeCSV(l['Contact Channel'] || l.contact_channel || ''),
+          escapeCSV(l['Verification Status'] || l.verification_status || 'Verified')
+        ];
+        csvRows.push(row.join(","));
+      });
+
+      var blob = new Blob([csvRows.join("\n")], { type: 'text/csv;charset=utf-8;' });
+      var url = URL.createObjectURL(blob);
+      var link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", "iit_kgp_leads_" + new Date().toISOString().slice(0, 10) + ".csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function escapeCSV(val) {
+      var str = String(val).replace(/"/g, '""');
+      return '"' + str + '"';
+    }
+
+    function escapeHtml(text) {
+      var div = document.createElement('div');
+      div.textContent = text || '';
+      return div.innerHTML;
+    }
+
+    // Keyboard support: Close drawer on Escape
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') hideDetailDrawer();
+    });
+
+    // Initialize Lucide icons on boot
+    document.addEventListener('DOMContentLoaded', function() {
+      refreshIcons();
     });
   </script>
 </body>
 </html>
-
