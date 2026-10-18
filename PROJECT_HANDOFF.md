@@ -1,8 +1,8 @@
 # PROJECT HANDOFF & CONTEXT TRANSFER DOCUMENT
 **Project:** Autonomous Lead Discovery & Verification Agent (CQ Scraper)  
 **Framework:** LangGraph Multi-Agent Architecture (Python 3.11+ / 3.14)  
-**Status:** Phases 0, 1, 2, 3, 4, 5, and 6 Fully Implemented & Verified (92/92 Tests Passing)  
-**Current Handover Point:** Ready for **Phase 7 (Hands-Free Google Sheets & Local SQLite Sync)**
+**Status:** Phases 0 through 8 Fully Implemented & Verified (110/110 Tests Passing)  
+**Current Handover Point:** Ready for **Phase 9 (Modern Frontend Dashboard UI)**
 
 ---
 
@@ -19,7 +19,7 @@ Build an autonomous AI agent using **LangGraph** that takes either a natural lan
 | **Agent Flow & Autonomy** (searches, follows links, handles dead pages) | **40** | **Phases 3, 4 & 6 Done** (Resilient crawler, link prioritization, dead-page failover, query reformulation, compiled LangGraph state machine with self-healing feedback loops). |
 | **Contact Accuracy** (real, deliverable contacts, no hallucinated data) | **30** | **Phases 4 & 5 Done** (Zero-hallucination extractor, pattern engine, DNS MX, non-intrusive SMTP handshake, catch-all detection, profile HEAD checks). |
 | **Brochure / PDF Parsing** (extracts targets from uploaded brochure) | **15** | **Phase 2 Done** (Hybrid PyMuPDF + pdfplumber + Vision OCR raster fallback). |
-| **End-to-End Pipeline** (hands-free, from query to populated sheet) | **15** | **Phases 1, 3 & 6 Done**. Phases 7 & 8 will wire live Google Sheet sync & streaming API. |
+| **End-to-End Pipeline** (hands-free, from query to populated sheet) | **15** | **Phases 1, 3, 6, 7 & 8 Done**. Hands-free Google Sheet sync + real-time FastAPI SSE streaming pipeline complete. |
 | **TOTAL** | **100** | On track for full 100/100 points. |
 
 ---
@@ -55,10 +55,10 @@ The system outputs records matching this exact 6-field schema. Any violation or 
 
 ## 4. Current Status: What Has Been Built & Tested
 
-All tasks across **Phases 0 through 6** are 100% complete with **92 automated tests passing**:
+All tasks across **Phases 0 through 8** are 100% complete with **110 automated tests passing**:
 
 ```
-============================== 92 passed in 1.39s ==============================
+============================= 110 passed in 1.76s ==============================
 ```
 
 ### Phase 0: Workspace & Dependency Isolation
@@ -163,6 +163,32 @@ All tasks across **Phases 0 through 6** are 100% complete with **92 automated te
   - Compiles master `StateGraph(AgentState)` with `MemorySaver` checkpointer for state auditability, pause/resume, and event streaming.
 - **`tests/test_graph_flow.py`**: 16 unit and integration tests covering node execution, conditional branching, dead link recovery, and full end-to-end flow.
 
+### Phase 7: Hands-Free Google Sheets & Local SQLite Sync (`src/storage/`)
+- **`src/storage/google_sheets.py` (`GoogleSheetsSyncClient`)**:
+  - Authenticates with Google Service Account credentials via `gspread` (or falls back to mock storage gracefully when credentials are absent).
+  - Idempotent sheet initialization: enforces exact 6-column headers with navy background (`#1E293B`), white bold text, and frozen header row.
+  - In-sheet deduplication: queries existing `Organization Name` and `Contact Channel` columns to avoid duplicate rows.
+  - Rate-limited batch row ingestion via `worksheet.append_rows()`.
+  - Conditional status styling: light green for `"Verified"` leads, light amber for `"Pattern-Derived"`.
+- **`src/storage/database.py` (`LocalDatabase`)**:
+  - Asynchronous SQLite persistence using `aiosqlite`.
+  - Stores `runs` (sessions, prompt/brochure, timestamps, lead counts, sheet URLs), `leads` (6-field records, source provenance), and `audit_logs` (chronological node logs).
+- **`tests/test_storage.py`**: 7 unit tests testing mock fallback, header styling, deduplication, batch insertion, and SQLite CRUD operations.
+
+### Phase 8: FastAPI Backend & Real-Time Event Streaming (`src/api/`)
+- **`src/api/app.py`**:
+  - FastAPI application factory with permissive CORS middleware for frontend clients.
+  - Lifespan context manager auto-initializing database tables and upload folders on startup.
+- **`src/api/routes.py`**:
+  - `POST /api/run`: Accepts multipart form (`search_prompt`, `category_focus`, `max_targets`, or PDF `brochure`), validates inputs, initiates async background graph execution, and returns `session_id` with streaming URLs.
+  - `GET /api/stream/{session_id}`: High-performance Server-Sent Events (SSE) streaming real-time node transitions, live audit logs, newly discovered leads, and sheet sync notifications with automatic historical event catch-up.
+  - `GET /api/leads/{session_id}`: Retrieves verified 6-field leads and Google Sheet URL from SQLite database or active in-flight stream history.
+  - `GET /api/status/{session_id}`: Returns run status, completion flag, total count, Google Sheet URL, and recent audit logs.
+  - `GET /api/health`: Service health check.
+- **`src/api/stream.py` (`SessionStreamManager`, `StreamEvent`)**:
+  - Thread-safe event bus and playback buffer with multi-client subscription support and polite SSE ping keep-alives.
+- **`tests/test_api.py`**: 11 unit and integration tests verifying health, input validation, background execution, database persistence, status endpoints, and SSE replay.
+
 ---
 
 ## 5. File & Module Structure
@@ -212,7 +238,7 @@ CQ_Scraper/
 │   │   ├── pattern_engine.py           # Domain email pattern engine (>=2 samples rule)
 │   │   └── decision_maker.py           # Persona extractor & generic email nullifier
 │   │
-│   ├── verifier/                       # [PHASE 5 TARGET]
+│   ├── verifier/                       # [PHASE 5 COMPLETE]
 │   │   ├── __init__.py
 │   │   ├── syntax_check.py             # RFC-5322 compliance & typo checker
 │   │   ├── mx_resolver.py              # Asynchronous DNS MX record resolver
@@ -220,65 +246,55 @@ CQ_Scraper/
 │   │   ├── social_validator.py         # HTTP HEAD/GET live status checker
 │   │   └── contact_verifier.py         # Master multi-stage verification pipeline
 │   │
-│   ├── graph/                          # [PHASE 6 TARGET]
+│   ├── graph/                          # [PHASE 6 COMPLETE]
 │   │   ├── __init__.py
 │   │   ├── nodes.py                    # LangGraph execution nodes
 │   │   ├── edges.py                    # Conditional routers (dead link pivot, retry loops)
 │   │   └── lead_graph.py               # StateGraph compilation & MemorySaver checkpointer
 │   │
-│   ├── storage/                        # [PHASE 7 TARGET]
+│   ├── storage/                        # [PHASE 7 COMPLETE]
 │   │   ├── __init__.py
 │   │   ├── database.py                 # SQLite local persistence & audit logs
 │   │   └── google_sheets.py            # gspread batch row sync & header styling
 │   │
-│   └── api/                            # [PHASE 8 TARGET]
+│   └── api/                            # [PHASE 8 COMPLETE]
 │       ├── __init__.py
 │       ├── app.py                      # FastAPI server instance
-│       ├── routes.py                   # /api/run, /api/status, /api/export
-│       └── stream.py                   # SSE event streaming generator
+│       ├── routes.py                   # /api/run, /api/status, /api/leads, /api/stream
+│       └── stream.py                   # SSE event streaming generator & SessionStreamManager
 │
-└── tests/                              # Comprehensive test suite (56 tests)
+└── tests/                              # Comprehensive test suite (110 tests)
     ├── __init__.py
-    ├── test_schema.py                  # 26 tests
-    ├── test_brochure_parser.py         # 8 tests
-    ├── test_crawler_and_search.py      # 12 tests
-    └── test_decision_maker.py          # 10 tests
+    ├── test_schema.py                  # 26 tests (Phase 1)
+    ├── test_brochure_parser.py         # 8 tests (Phase 2)
+    ├── test_crawler_and_search.py      # 12 tests (Phase 3)
+    ├── test_decision_maker.py          # 10 tests (Phase 4)
+    ├── test_verifier.py                # 20 tests (Phase 5)
+    ├── test_graph_flow.py              # 16 tests (Phase 6)
+    ├── test_storage.py                 # 7 tests (Phase 7)
+    └── test_api.py                     # 11 tests (Phase 8)
 ```
 
 ---
 
 ## 6. What Needs to Be Done Next: Step-by-Step
 
-Phases 0 through 6 are complete and verified. The next step is **Phase 7 through Phase 10** in sequential order:
+Phases 0 through 8 are complete and verified (110/110 tests passing). The next step is **Phase 9 through Phase 10** in sequential order:
 
-### NEXT STEP: Phase 7 — Hands-Free Google Sheets & Local SQLite Sync
-*(Targeting 15 Points: End-to-End Pipeline)*
-1. **`src/storage/google_sheets.py`**:
-   - Authenticate with Google Service Account credentials via `gspread`.
-   - Idempotent sheet initialization: enforce exact 6-column headers with navy styling (`#1E293B`) and frozen header row.
-   - Deduplication against existing rows (`Organization Name` and `Contact Channel`).
-   - Batch row insertion (`append_rows`) in chunks to respect Google API limits.
-   - Color code `Verification Status` cells (Green for "Verified", Amber for "Pattern-Derived").
-2. **`src/storage/database.py`**:
-   - Local SQLite database (`aiosqlite`) storing run histories, raw crawl snippets, MX records, and timestamps for offline replayability and evaluation audit.
-3. **`tests/test_storage.py`**:
-   - Unit tests mocking `gspread` client, batch insertions, duplicate prevention, and SQLite persistence.
-
----
-
-#### Phase 7: Hands-Free Google Sheets & Local SQLite Sync
-- **`src/storage/google_sheets.py`**: Google Service Account authentication via `gspread`, automatic header creation with navy styling (`#1E293B`), deduplication against existing rows, and batch cell insertion (`append_rows`).
-- **`src/storage/database.py`**: Local SQLite database for audit trails and offline replayability.
-
-#### Phase 8: FastAPI Backend & Real-Time Event Streaming
-- Endpoints: `POST /api/run` (FormData supporting prompt or brochure upload), `GET /api/stream/{session_id}` (SSE streaming events from LangGraph `astream_events()`), `GET /api/leads/{session_id}`.
-
-#### Phase 9: Modern Frontend Dashboard UI
-- Next.js 14 / React dashboard matching [`Design.md`](file:///home/vivekk-117/repositories/CQ_Scraper/Design.md):
-  - Hero input zone with prompt textarea and PDF drag-and-drop dropzone.
-  - Live pipeline stepper + JetBrains Mono terminal log feed.
-  - Interactive 6-column leads table with status badges (Green = Verified, Amber = Pattern-Derived).
-  - Prominent "Open in Google Sheets" action banner.
+### NEXT STEP: Phase 9 — Modern Frontend Dashboard UI
+*(Targeting Modern Interactive UI per Design.md)*
+1. **Next.js 14 App Shell & Design System Setup (`frontend/`)**:
+   - Modern dark obsidian palette (`#080B11`), slate surfaces, Inter and JetBrains Mono typography, Lucide React icons.
+2. **Hero Input Zone Component (`components/input-zone.tsx`)**:
+   - Tab 1: Natural Language Prompt textarea with pre-built example query chips.
+   - Tab 2: Drag-and-drop PDF dropzone with PDF preview and validation.
+3. **Live Execution Visualizer & Terminal Feed (`components/live-agent-feed.tsx`)**:
+   - Real-time active node stepper (Searching $\to$ Crawling $\to$ Extracting $\to$ Verifying $\to$ Syncing).
+   - JetBrains Mono terminal-style streaming SSE log viewer with timestamps and log levels.
+4. **The 6-Field Leads Table (`components/leads-table.tsx`)**:
+   - Clean, data-dense table strictly matching the 6 output fields.
+   - Distinct badges for Category (Teal/Indigo) and Verification Status (Green/Amber).
+   - Prominent "Open in Google Sheets" action banner.
 
 #### Phase 10: Verification, Testing & Benchmark Audit
 - End-to-end integration run testing both an uploaded brochure and a natural language search query down to a live Google Sheet.

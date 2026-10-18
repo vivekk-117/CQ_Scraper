@@ -176,17 +176,17 @@ Assemble the isolated nodes into an autonomous LangGraph `StateGraph` with condi
 Automatically push clean, verified 6-field rows into Google Sheets and local SQLite without manual intervention.
 
 #### Micro Elementary Tasks:
-- [ ] **Task 7.1: Google Sheets Client (`src/storage/google_sheets.py`)**
+- [x] **Task 7.1: Google Sheets Client (`src/storage/google_sheets.py`)**
   - Authenticate using Service Account credentials via `gspread`.
   - Create or open designated spreadsheet and worksheet.
   - Automatically format header row if new:
     `["Organization Name", "Category", "Location", "Contact Person", "Contact Channel", "Verification Status"]`
   - Style header: Bold text, dark background, frozen top row.
-- [ ] **Task 7.2: Idempotent Batch Row Insertion**
+- [x] **Task 7.2: Idempotent Batch Row Insertion**
   - Implement deduplication: Query existing rows in sheet to prevent duplicate organization names or emails.
   - Batch append rows in chunks of 10 to respect Google Sheets rate limits.
   - Color-code `Verification Status` column (Green for "Verified", Amber for "Pattern-Derived").
-- [ ] **Task 7.3: Local SQLite Storage & Audit Trail (`src/storage/database.py`)**
+- [x] **Task 7.3: Local SQLite Storage & Audit Trail (`src/storage/database.py`)**
   - Store full run logs, raw HTML snippets, MX test logs, and timestamps for audit verification and replay.
 
 ---
@@ -197,13 +197,13 @@ Automatically push clean, verified 6-field rows into Google Sheets and local SQL
 Expose high-performance REST and Server-Sent Events (SSE) endpoints to drive the user interface.
 
 #### Micro Elementary Tasks:
-- [ ] **Task 8.1: API Server Setup (`src/api/app.py` & `src/api/routes.py`)**
+- [x] **Task 8.1: API Server Setup (`src/api/app.py` & `src/api/routes.py`)**
   - Initialize FastAPI with CORS middleware.
   - Endpoint `POST /api/run`: Accepts multipart form (`search_prompt: str` or `brochure: UploadFile`). Returns `session_id`.
   - Endpoint `GET /api/stream/{session_id}`: Streams real-time LangGraph execution events via SSE.
   - Endpoint `GET /api/leads/{session_id}`: Returns JSON array of collected leads.
-- [ ] **Task 8.2: SSE Event Streaming Generator (`src/api/stream.py`)**
-  - Subscribe to LangGraph node events using `graph.astream_events()`.
+- [x] **Task 8.2: SSE Event Streaming Generator (`src/api/stream.py`)**
+  - Subscribe to LangGraph node events using `graph.astream_events()` / `astream()`.
   - Stream standardized SSE events: `node_start`, `log_message`, `lead_discovered`, `lead_verified`, `sheet_synced`, `error`.
 
 ---
