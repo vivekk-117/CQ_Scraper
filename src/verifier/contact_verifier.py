@@ -286,10 +286,33 @@ class ContactVerifier:
         Returns:
             Validated FinalLeadRecord or None if rejected.
         """
-        is_pattern_derived = "Pattern-Derived" in (candidate.raw_snippet or "")
+        email_candidate = candidate.email_candidate
+        raw_snippet = candidate.raw_snippet or ""
+        is_pattern_derived = "Pattern-Derived" in raw_snippet
+
+        # If email candidate is missing, but candidate name and domain samples exist,
+        # attempt pattern synthesis (strictly requires >= 2 domain samples)
+        if not email_candidate and candidate.name and domain_email_samples:
+            domain = EmailPatternEngine.extract_domain(candidate.source_url)
+            if not domain and domain_email_samples:
+                domain = domain_email_samples[0].split("@")[-1]
+            if domain:
+                pattern_rule = EmailPatternEngine.detect_pattern_from_samples(
+                    sample_emails=domain_email_samples,
+                    domain=domain,
+                )
+                if pattern_rule:
+                    derived = EmailPatternEngine.synthesize_email(
+                        full_name=candidate.name,
+                        domain=domain,
+                        pattern_rule=pattern_rule,
+                    )
+                    if derived:
+                        email_candidate = derived
+                        is_pattern_derived = True
 
         verification = await self.verify_contact(
-            email_candidate=candidate.email_candidate,
+            email_candidate=email_candidate,
             profile_url_candidate=candidate.profile_url_candidate,
             decision_maker_name=candidate.name,
             domain_email_samples=domain_email_samples,

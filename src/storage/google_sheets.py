@@ -178,14 +178,27 @@ class GoogleSheetsSyncClient:
         if client is None:
             mock_id = self.spreadsheet_id or "mock_sheet_101"
             mock_url = f"https://docs.google.com/spreadsheets/d/{mock_id}/edit"
-            logs.append("Executed mock sheet sync: Credentials not configured.")
+            if not hasattr(self, "_mock_synced_leads"):
+                self._mock_synced_leads = set()
+
+            new_count = 0
+            dupe_count = 0
+            for rec in records:
+                key = (rec.organization_name.strip().lower(), rec.contact_channel.strip().lower())
+                if key in self._mock_synced_leads:
+                    dupe_count += 1
+                else:
+                    self._mock_synced_leads.add(key)
+                    new_count += 1
+
+            logs.append(f"Executed mock sheet sync: {new_count} appended, {dupe_count} skipped.")
             return SheetSyncResult(
                 spreadsheet_id=mock_id,
                 spreadsheet_url=mock_url,
                 worksheet_title="Sheet1",
-                rows_appended=len(records),
-                duplicates_skipped=0,
-                total_rows=len(records) + 1,
+                rows_appended=new_count,
+                duplicates_skipped=dupe_count,
+                total_rows=len(self._mock_synced_leads) + 1,
                 is_mock=True,
                 logs=logs,
             )

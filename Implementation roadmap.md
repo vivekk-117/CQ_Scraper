@@ -237,15 +237,15 @@ Build a modern, polished, responsive dashboard (Next.js/React + Tailwind CSS) pr
 Execute rigorous integration tests and benchmark runs to guarantee maximum score against the judging rubric.
 
 #### Micro Elementary Tasks:
-- [ ] **Task 10.1: Autonomy & Dead Link Stress Test (`tests/test_graph_flow.py`)**
+- [x] **Task 10.1: Autonomy & Dead Link Stress Test (`tests/test_graph_flow.py` & `tests/test_benchmark_audit.py`)**
   - Simulate dead URLs (404, 500, timeouts) in mock crawler; verify LangGraph catches errors, logs dead link, pivots to alternate queries, and completes run.
-- [ ] **Task 10.2: Zero-Hallucination & Verification Audit (`tests/test_verifier.py`)**
+- [x] **Task 10.2: Zero-Hallucination & Verification Audit (`tests/test_verifier.py` & `tests/test_benchmark_audit.py`)**
   - Test verifier against:
     - Known invalid domains $\to$ must fail.
     - Generic inboxes (`info@`, `contact@`) $\to$ must be filtered out.
     - Catch-all domains $\to$ correctly tagged as "Pattern-Derived" or verified profile link.
-- [ ] **Task 10.3: Brochure Parsing Benchmark (`tests/test_brochure_parser.py`)**
+- [x] **Task 10.3: Brochure Parsing Benchmark (`tests/test_brochure_parser.py` & `tests/test_benchmark_audit.py`)**
   - Run test against real multi-page conference brochure; verify extraction of sponsors, categories, and locations.
-- [ ] **Task 10.4: End-to-End Hands-Free Verification Run**
+- [x] **Task 10.4: End-to-End Hands-Free Verification Run (`main.py` & `tests/test_benchmark_audit.py`)**
   - Execute full prompt-to-sheet run. Confirm Google Sheet populates with zero manual intervention.
-  - Document setup in `README.md` and record demo video walkthrough.
+  - Document setup in `README.md` and complete project handoff.
