@@ -7,13 +7,18 @@ and mounts the lead discovery API endpoints.
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
-from fastapi import FastAPI
+from pathlib import Path
+from typing import Any, AsyncGenerator, Union
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse, JSONResponse
 from loguru import logger
 
 from src.api.routes import router, UPLOADS_DIR
 from src.storage.database import LocalDatabase
+
+TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
+DASHBOARD_HTML_FILE = TEMPLATES_DIR / "dashboard.html"
 
 
 @asynccontextmanager
@@ -53,15 +58,31 @@ def create_app() -> FastAPI:
     # Mount API routers
     application.include_router(router)
 
-    @application.get("/", tags=["Root"])
-    async def root_index() -> dict[str, str]:
-        return {
+    def _get_dashboard_html() -> str:
+        if DASHBOARD_HTML_FILE.exists():
+            return DASHBOARD_HTML_FILE.read_text(encoding="utf-8")
+        return "<html><body><h1>CQ Scraper Dashboard</h1></body></html>"
+
+    @application.get("/dashboard", response_class=HTMLResponse, tags=["Dashboard"])
+    async def dashboard_view() -> HTMLResponse:
+        """Renders the full modern frontend dashboard."""
+        return HTMLResponse(content=_get_dashboard_html())
+
+    @application.get("/", tags=["Root"], response_model=None)
+    async def root_index(request: Request) -> Any:
+        accept_header = request.headers.get("accept", "")
+        # If requested by a web browser directly, deliver the visual dashboard
+        if "text/html" in accept_header and "application/json" not in accept_header:
+            return HTMLResponse(content=_get_dashboard_html())
+
+        return JSONResponse(content={
             "service": "Autonomous Lead Discovery & Verification Agent API",
             "status": "online",
             "version": "1.0.0",
             "docs_url": "/docs",
             "health_url": "/api/health",
-        }
+            "dashboard_url": "/dashboard",
+        })
 
     return application
 

@@ -38,6 +38,22 @@ class TestAPIEndpoints:
         assert data["status"] == "online"
         assert "Autonomous Lead Discovery" in data["service"]
 
+    def test_dashboard_html_view(self, client: TestClient):
+        """GET /dashboard serves full interactive dashboard HTML."""
+        res = client.get("/dashboard")
+        assert res.status_code == 200
+        assert "text/html" in res.headers["content-type"]
+        assert "CQ Scraper" in res.text
+        assert "Master Leads Roster" in res.text
+        assert "LangGraph Pipeline Execution" in res.text
+
+    def test_root_html_browser_request(self, client: TestClient):
+        """GET / with browser Accept header delivers dashboard HTML directly."""
+        res = client.get("/", headers={"accept": "text/html,application/xhtml+xml"})
+        assert res.status_code == 200
+        assert "text/html" in res.headers["content-type"]
+        assert "CQ Scraper" in res.text
+
     def test_health_check_endpoint(self, client: TestClient):
         """GET /api/health returns service healthy."""
         res = client.get("/api/health")

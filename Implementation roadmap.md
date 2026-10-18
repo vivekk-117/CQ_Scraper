@@ -214,17 +214,17 @@ Expose high-performance REST and Server-Sent Events (SSE) endpoints to drive the
 Build a modern, polished, responsive dashboard (Next.js/React + Tailwind CSS) providing live execution monitoring and instant Google Sheet links.
 
 #### Micro Elementary Tasks:
-- [ ] **Task 9.1: Next.js 14 App Shell & Design System Setup**
+- [x] **Task 9.1: Next.js 14 App Shell & Design System Setup**
   - Setup Tailwind CSS with modern dark/light slate color tokens, Inter font, and JetBrains Mono for logs.
   - Install Lucide React icons and shadcn/ui components.
-- [ ] **Task 9.2: Input Zone Component (`components/input-zone.tsx`)**
+- [x] **Task 9.2: Input Zone Component (`components/input-zone.tsx`)**
   - Create tabbed input:
     - Tab 1: Natural Language Prompt textarea with pre-built example chips (e.g., "Find FinTech Sponsors in Mumbai", "Robotics Societies in Delhi").
     - Tab 2: Drag-and-drop PDF dropzone with PDF preview and file size validation.
-- [ ] **Task 9.3: Live Execution Visualizer & Terminal Feed (`components/live-agent-feed.tsx`)**
+- [x] **Task 9.3: Live Execution Visualizer & Terminal Feed (`components/live-agent-feed.tsx`)**
   - Render active node indicator (Searching $\to$ Crawling $\to$ Extracting $\to$ Verifying $\to$ Syncing).
   - Terminal-style streaming log viewer showing real-time decisions, dead link bypasses, and MX handshake results.
-- [ ] **Task 9.4: The 6-Field Leads Table (`components/leads-table.tsx`)**
+- [x] **Task 9.4: The 6-Field Leads Table (`components/leads-table.tsx`)**
   - Render clean, data-dense table matching the exact 6 columns.
   - Distinct badge colors for `Category` (Sponsor: Teal, Delegation: Indigo) and `Verification Status` (Verified: Green, Pattern-Derived: Amber).
   - Prominent banner with direct clickable link: `"Open in Google Sheets"`.
