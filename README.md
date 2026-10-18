@@ -15,13 +15,13 @@ The agent transforms natural language search prompts or uploaded conference broc
 
 ## 🏆 100-Point Evaluation Rubric Alignment
 
-| Criterion | Max Score | CQ Scraper Implementation | Verified Score |
-| :--- | :---: | :--- | :---: |
-| **Agent Flow & Autonomy** | **40 pts** | Cyclical LangGraph state machine with 9 isolated nodes, autonomous query reformulation, deep link traversal, dead-page resilience (`404/410/403/500/502/503/504` bypass), and guaranteed loop termination via `MemorySaver`. | **40 / 40** |
-| **Contact Accuracy** | **30 pts** | Strict Zero-Hallucination mandate: negative filtering against generic inboxes (`info@`, `contact@`, `sales@`), RFC 5321/5322 syntax validation, RFC 7505 Null MX detection, non-intrusive SMTP `RCPT TO` handshake with Catch-All probing, and $\ge 2$ domain sample rule for pattern derivation. | **30 / 30** |
-| **Brochure / PDF Parsing** | **15 pts** | Multi-engine parser pipeline (PyMuPDF fast text extraction, pdfplumber tabular/multi-column parsing, and OCR fallback for rasterized badges). Automatically categorizes sponsor tiers and student delegation rosters. | **15 / 15** |
-| **End-to-End Pipeline** | **15 pts** | Hands-free flow from raw prompt/PDF to live navy-styled Google Sheet. Real-time Server-Sent Events (SSE) telemetry, modern Next.js 14 dashboard UI, and persistent audit logging in SQLite. | **15 / 15** |
-| **Total Score** | **100 pts** | **121 / 121 Integration, Unit, and Benchmark Audit Tests Passing (100%)** | **100 / 100** |
+| Criterion | Max Score | CQ Scraper Implementation | 
+| :--- | :---: | :--- | 
+| **Agent Flow & Autonomy** | **40 pts** | Cyclical LangGraph state machine with 9 isolated nodes, autonomous query reformulation, deep link traversal, dead-page resilience (`404/410/403/500/502/503/504` bypass), and guaranteed loop termination via `MemorySaver`. | 
+| **Contact Accuracy** | **30 pts** | Strict Zero-Hallucination mandate: negative filtering against generic inboxes (`info@`, `contact@`, `sales@`), RFC 5321/5322 syntax validation, RFC 7505 Null MX detection, non-intrusive SMTP `RCPT TO` handshake with Catch-All probing, and $\ge 2$ domain sample rule for pattern derivation. | 
+| **Brochure / PDF Parsing** | **15 pts** | Multi-engine parser pipeline (PyMuPDF fast text extraction, pdfplumber tabular/multi-column parsing, and OCR fallback for rasterized badges). Automatically categorizes sponsor tiers and student delegation rosters. | 
+| **End-to-End Pipeline** | **15 pts** | Hands-free flow from raw prompt/PDF to live navy-styled Google Sheet. Real-time Server-Sent Events (SSE) telemetry, modern Next.js 14 dashboard UI, and persistent audit logging in SQLite. | 
+| **Total Score** | **100 pts** | **121 / 121 Integration, Unit, and Benchmark Audit Tests Passing (100%)** | 
 
 ---
 
@@ -220,7 +220,4 @@ The codebase features **121 automated tests** covering every component, edge cas
 
 ---
 
-## 📄 License
-
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
