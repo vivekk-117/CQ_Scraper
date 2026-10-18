@@ -12,32 +12,33 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg-app: #F7F8FA;
-      --bg-surface: #FFFFFF;
-      --bg-secondary: #F1F3F5;
-      --text-primary: #17202A;
-      --text-secondary: #5F6B76;
-      --text-muted: #77818B;
-      --border: #E2E6EA;
-      --border-focus: #2457C5;
-      --action-primary: #2457C5;
-      --action-primary-hover: #1B44A0;
-      --cat-sponsor: #087F8C;
-      --cat-sponsor-bg: #E6F6F8;
-      --cat-delegation: #6B4DB3;
+      --bg-app: #F7F5F0;
+      --bg-surface: #FFFEFB;
+      --bg-secondary: #F2EFE9;
+      --bg-tint-green: #E8F1EC;
+      --text-primary: #222722;
+      --text-secondary: #69716C;
+      --text-muted: #8C938E;
+      --border: #E5E0D7;
+      --border-focus: #17664F;
+      --action-primary: #17664F;
+      --action-primary-hover: #125340;
+      --cat-sponsor: #17664F;
+      --cat-sponsor-bg: #E8F1EC;
+      --cat-delegation: #5A4588;
       --cat-delegation-bg: #F2EEFA;
-      --success: #18794E;
-      --success-bg: #EBF8F1;
-      --warning: #946200;
-      --warning-bg: #FEF7E8;
+      --success: #17664F;
+      --success-bg: #E8F1EC;
+      --warning: #8A5F00;
+      --warning-bg: #FDF4E2;
       --error: #B42318;
-      --error-bg: #FEE4E2;
+      --error-bg: #FEECEB;
       --radius-sm: 8px;
       --radius-md: 10px;
       --radius-lg: 12px;
-      --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.05);
-      --shadow-md: 0 4px 8px -2px rgba(16, 24, 40, 0.08), 0 2px 4px -2px rgba(16, 24, 40, 0.04);
-      --shadow-lg: 0 12px 16px -4px rgba(16, 24, 40, 0.08), 0 4px 6px -2px rgba(16, 24, 40, 0.03);
+      --shadow-sm: 0 1px 2px rgba(34, 39, 34, 0.04);
+      --shadow-md: 0 4px 8px -2px rgba(34, 39, 34, 0.06), 0 2px 4px -2px rgba(34, 39, 34, 0.03);
+      --shadow-lg: 0 12px 16px -4px rgba(34, 39, 34, 0.08), 0 4px 6px -2px rgba(34, 39, 34, 0.03);
     }
 
     body {
@@ -56,9 +57,9 @@
       position: sticky;
       top: 0;
       z-index: 40;
-      background: var(--bg-surface);
+      background: var(--bg-app);
       border-bottom: 1px solid var(--border);
-      height: 56px;
+      height: 64px;
       display: flex;
       align-items: center;
     }
@@ -80,7 +81,7 @@
     .brand-mark {
       width: 32px;
       height: 32px;
-      border-radius: var(--radius-sm);
+      border-radius: 6px;
       background: var(--action-primary);
       color: #FFFFFF;
       display: flex;
@@ -95,57 +96,59 @@
       flex-direction: column;
     }
     .brand-title {
-      font-size: 14px;
-      font-weight: 600;
+      font-size: 15px;
+      font-weight: 700;
       color: var(--text-primary);
       line-height: 1.2;
     }
     .brand-subtitle {
-      font-size: 11px;
-      color: var(--text-muted);
-      font-weight: 500;
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 400;
     }
     .nav-tabs {
       display: flex;
-      gap: 4px;
-      background: var(--bg-secondary);
-      padding: 3px;
-      border-radius: var(--radius-sm);
+      align-items: center;
+      gap: 24px;
+      height: 64px;
     }
     .nav-tab-btn {
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 500;
       color: var(--text-secondary);
-      padding: 6px 14px;
-      border-radius: 6px;
       border: none;
       background: transparent;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      transition: all 0.15s ease;
+      gap: 8px;
+      height: 100%;
+      position: relative;
+      padding: 0 2px;
+      border-bottom: 2.5px solid transparent;
+      transition: color 0.15s ease, border-color 0.15s ease;
     }
     .nav-tab-btn:hover {
       color: var(--text-primary);
     }
     .nav-tab-btn.active {
-      background: var(--bg-surface);
       color: var(--action-primary);
       font-weight: 600;
-      box-shadow: var(--shadow-sm);
+      background: transparent;
+      box-shadow: none;
+      border-bottom: 2.5px solid var(--action-primary);
     }
     .tab-badge {
       font-size: 11px;
       font-weight: 600;
-      background: var(--bg-secondary);
-      color: var(--text-secondary);
-      padding: 1px 6px;
-      border-radius: 10px;
+      background: #E5E0D7;
+      color: var(--text-primary);
+      padding: 1px 7px;
+      border-radius: 9999px;
     }
     .nav-tab-btn.active .tab-badge {
-      background: #EBF0FA;
-      color: var(--action-primary);
+      background: #E5E0D7;
+      color: var(--text-primary);
     }
 
     /* ── Main Layout ────────────────────────────────────── */
@@ -161,16 +164,26 @@
     .page-heading {
       margin-bottom: 24px;
     }
+    .page-eyebrow {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--action-primary);
+      margin-bottom: 8px;
+    }
     .page-title {
-      font-size: 26px;
+      font-size: 30px;
       font-weight: 700;
       color: var(--text-primary);
       letter-spacing: -0.02em;
+      line-height: 1.25;
     }
     .page-description {
-      font-size: 14px;
+      font-size: 15px;
       color: var(--text-secondary);
-      margin-top: 4px;
+      margin-top: 8px;
+      line-height: 1.5;
     }
 
     /* ── Discovery Card ─────────────────────────────────── */
@@ -178,8 +191,8 @@
       background: var(--bg-surface);
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
-      padding: 24px;
-      box-shadow: var(--shadow-sm);
+      padding: 28px 32px;
+      box-shadow: none;
     }
     .field-label {
       display: flex;
@@ -188,18 +201,19 @@
       margin-bottom: 8px;
     }
     .field-title {
-      font-size: 13px;
-      font-weight: 600;
+      font-size: 16px;
+      font-weight: 700;
       color: var(--text-primary);
     }
     .field-hint {
-      font-size: 12px;
-      color: var(--text-muted);
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-weight: 400;
     }
     .search-input-area {
       width: 100%;
-      min-height: 90px;
-      padding: 12px 14px;
+      min-height: 104px;
+      padding: 14px 16px;
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       font-family: inherit;
@@ -216,7 +230,7 @@
     .search-input-area:focus {
       outline: none;
       border-color: var(--action-primary);
-      box-shadow: 0 0 0 3px rgba(36, 87, 197, 0.12);
+      box-shadow: 0 0 0 3px rgba(23, 102, 79, 0.12);
     }
 
     /* ── Prompt Suggestions ─────────────────────────────── */
@@ -224,36 +238,35 @@
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 6px;
-      margin-top: 10px;
+      gap: 8px;
+      margin-top: 12px;
     }
     .suggestion-label {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-right: 4px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-right: 2px;
     }
     .suggestion-chip {
-      font-size: 12px;
-      color: var(--text-secondary);
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      padding: 4px 10px;
-      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--action-primary);
+      background: var(--bg-tint-green);
+      border: 1px solid transparent;
+      padding: 5px 14px;
+      border-radius: 9999px;
       cursor: pointer;
-      transition: all 0.15s;
+      transition: all 0.15s ease;
     }
     .suggestion-chip:hover {
-      background: #EDF2FC;
-      border-color: #C3D4F5;
-      color: var(--action-primary);
+      background: #DDEAE2;
     }
 
     /* ── Controls Row ───────────────────────────────────── */
     .controls-grid {
-      display: grid;
-      grid-template-columns: 1fr auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
       gap: 20px;
-      align-items: center;
       margin-top: 24px;
       padding-top: 20px;
       border-top: 1px solid var(--border);
@@ -261,17 +274,17 @@
     .selector-group {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 8px;
     }
     .selector-label {
-      font-size: 12px;
-      font-weight: 600;
+      font-size: 13px;
+      font-weight: 700;
       color: var(--text-primary);
     }
     .segment-picker {
       display: inline-flex;
-      background: var(--bg-secondary);
-      padding: 3px;
+      background: var(--bg-surface);
+      padding: 2px;
       border-radius: var(--radius-sm);
       border: 1px solid var(--border);
       width: fit-content;
@@ -280,58 +293,77 @@
       font-size: 13px;
       font-weight: 500;
       color: var(--text-secondary);
-      padding: 6px 14px;
+      padding: 7px 16px;
       border: none;
       background: transparent;
       border-radius: 6px;
       cursor: pointer;
-      transition: all 0.15s;
+      transition: all 0.15s ease;
     }
     .segment-btn:hover {
       color: var(--text-primary);
     }
     .segment-btn.active {
-      background: var(--bg-surface);
-      color: var(--text-primary);
+      background: var(--bg-tint-green);
+      color: var(--action-primary);
       font-weight: 600;
-      box-shadow: var(--shadow-sm);
+      box-shadow: none;
+      border: 1px solid #D0E2D8;
     }
 
     /* ── Brochure Section (Progressive Disclosure) ──────── */
     .brochure-disclosure {
-      margin-top: 18px;
+      margin-top: 20px;
       padding-top: 18px;
       border-top: 1px solid var(--border);
     }
     .disclosure-toggle {
       background: none;
       border: none;
-      color: var(--text-secondary);
-      font-size: 13px;
+      color: var(--text-primary);
+      font-size: 14px;
       font-weight: 500;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       cursor: pointer;
       padding: 0;
       transition: color 0.15s;
     }
     .disclosure-toggle:hover {
-      color: var(--text-primary);
+      color: var(--action-primary);
     }
-    .disclosure-toggle i {
+    .disclosure-toggle i,
+    .disclosure-toggle .disclosure-chevron {
       transition: transform 0.2s ease;
     }
-    .disclosure-toggle.open i {
+    .disclosure-toggle.open i[data-lucide="chevron-down"],
+    .disclosure-toggle.open .disclosure-chevron {
       transform: rotate(180deg);
     }
+    .disclosure-text-group {
+      display: inline-flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 3px 8px;
+      text-align: left;
+    }
+    .disclosure-title {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .disclosure-subtext {
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--text-secondary);
+    }
     .disclosure-content {
-      margin-top: 12px;
+      margin-top: 14px;
     }
     .dropzone-container {
       border: 1px dashed var(--border);
       border-radius: var(--radius-sm);
-      padding: 20px;
+      padding: 22px;
       text-align: center;
       background: var(--bg-secondary);
       cursor: pointer;
@@ -339,7 +371,7 @@
     }
     .dropzone-container:hover {
       border-color: var(--action-primary);
-      background: #F4F7FD;
+      background: var(--bg-tint-green);
     }
     .dropzone-lead {
       font-size: 13px;
@@ -349,7 +381,7 @@
     .dropzone-subtext {
       font-size: 12px;
       color: var(--text-muted);
-      margin-top: 2px;
+      margin-top: 3px;
     }
     .uploaded-file-row {
       display: flex;
@@ -386,6 +418,21 @@
     .file-remove-btn:hover {
       color: var(--error);
       background: var(--error-bg);
+    }
+
+    /* ── Trust Note ─────────────────────────────────────── */
+    .trust-note-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 18px;
+      padding-left: 2px;
+    }
+    .trust-note-row i {
+      color: var(--action-primary);
+      flex-shrink: 0;
     }
 
     /* ── Action Buttons ─────────────────────────────────── */
@@ -428,6 +475,7 @@
     .btn-secondary:hover {
       background: var(--bg-secondary);
       color: var(--text-primary);
+    }
     }
 
     /* ── Running Status Card ────────────────────────────── */
@@ -699,7 +747,7 @@
       transition: background 0.1s ease;
     }
     table.data-table tbody tr:hover {
-      background: #F8FAFC;
+      background: var(--bg-secondary);
     }
 
     /* ── Table Badges & Cell Elements ───────────────────── */
@@ -784,7 +832,7 @@
     .btn-row-action:hover {
       border-color: var(--action-primary);
       color: var(--action-primary);
-      background: #F4F7FD;
+      background: var(--bg-tint-green);
     }
 
     /* ── Empty States ───────────────────────────────────── */
@@ -811,7 +859,7 @@
     .drawer-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(17, 24, 39, 0.4);
+      background: rgba(34, 39, 34, 0.4);
       z-index: 50;
       display: flex;
       justify-content: flex-end;
@@ -893,7 +941,7 @@
     }
     .evidence-box.verified {
       background: var(--success-bg);
-      border-color: #C3E6D2;
+      border-color: #D0E2D8;
       color: var(--success);
     }
     .evidence-box.derived {
@@ -922,7 +970,7 @@
     }
     .banner-notification.success {
       background: var(--success-bg);
-      border: 1px solid #C3E6D2;
+      border: 1px solid #D0E2D8;
       color: var(--success);
     }
     .banner-notification.error {
@@ -944,14 +992,21 @@
 
     /* ── Responsive Mobile Rules ────────────────────────── */
     @media (max-width: 768px) {
-      .app-header { height: 52px; }
+      .app-header { height: 56px; }
       .header-inner { padding: 0 16px; }
       .brand-group { gap: 8px; }
-      .brand-title { font-size: 13px; }
+      .brand-title { font-size: 14px; }
       .brand-subtitle { display: none; }
-      .nav-tab-btn { padding: 5px 10px; font-size: 12px; }
-      .app-main { padding: 18px 16px; }
-      .controls-grid { grid-template-columns: 1fr; }
+      .nav-tabs { gap: 16px; height: 56px; }
+      .nav-tab-btn { font-size: 13px; }
+      .app-main { padding: 20px 16px 48px 16px; }
+      .page-title { font-size: 24px; }
+      .discovery-card { padding: 20px 16px; }
+      .controls-grid { flex-direction: column; align-items: stretch; gap: 16px; }
+      .selector-group { width: 100%; }
+      .segment-picker { width: 100%; display: flex; }
+      .segment-btn { flex: 1; text-align: center; padding: 7px 8px; font-size: 12px; }
+      .btn-action-primary { width: 100%; justify-content: center; padding: 12px; }
       .step-progress-bar { flex-direction: column; align-items: flex-start; gap: 8px; }
       .step-separator { display: none; }
       .search-box-wrap { max-width: 100%; }
@@ -960,6 +1015,14 @@
       .leads-bar { flex-direction: column; align-items: flex-start; }
       .leads-bar-actions { width: 100%; justify-content: space-between; }
       .empty-placeholder { padding: 32px 16px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
     }
 
     .hidden { display: none !important; }
@@ -979,11 +1042,9 @@
       </div>
       <nav class="nav-tabs" aria-label="Main Navigation">
         <button type="button" class="nav-tab-btn active" id="tabNavDiscovery" onclick="switchMainTab('discovery')" aria-current="page">
-          <i data-lucide="compass" style="width:14px;height:14px;"></i>
           <span>Discovery</span>
         </button>
         <button type="button" class="nav-tab-btn" id="tabNavLeads" onclick="switchMainTab('leads')">
-          <i data-lucide="list-filter" style="width:14px;height:14px;"></i>
           <span>Leads</span>
           <span class="tab-badge" id="navLeadsCountBadge">0</span>
         </button>
@@ -998,32 +1059,33 @@
     <!-- ═══════════════════════════════════════════════════ -->
     <section id="viewDiscovery">
       <div class="page-heading">
-        <h1 class="page-title">Find potential sponsors and delegations</h1>
-        <p class="page-description">Describe the organizations you want to find for your IIT Kharagpur event.</p>
+        <div class="page-eyebrow">EVENT RESEARCH WORKSPACE</div>
+        <h1 class="page-title">Find the right sponsors and college delegations.</h1>
+        <p class="page-description">Discover relevant organizations for your IIT Kharagpur event, then review sources before outreach.</p>
       </div>
 
       <div class="discovery-card">
         <!-- Search Brief Input -->
         <div class="field-label">
           <label for="searchBriefInput" class="field-title">Search brief</label>
-          <span class="field-hint">Natural language query</span>
+          <span class="field-hint">Describe your ideal leads</span>
         </div>
         <textarea id="searchBriefInput" class="search-input-area" rows="3"
-          placeholder="Find Indian robotics companies that sponsor student events, or collegiate technical teams in Delhi"
+          placeholder="e.g. Indian robotics companies that sponsor student events, or collegiate technical teams in Delhi"
           aria-label="Search brief for potential sponsors or college delegations"></textarea>
 
         <!-- Suggestions -->
         <div class="suggestions-row" aria-label="Quick example searches">
-          <span class="suggestion-label">Suggestions:</span>
+          <span class="suggestion-label">Try:</span>
           <button type="button" class="suggestion-chip" onclick="applySuggestion(this.textContent)">FinTech sponsors in Bengaluru</button>
-          <button type="button" class="suggestion-chip" onclick="applySuggestion(this.textContent)">Robotics college teams in Delhi</button>
-          <button type="button" class="suggestion-chip" onclick="applySuggestion(this.textContent)">AI and cloud companies in Mumbai</button>
+          <button type="button" class="suggestion-chip" onclick="applySuggestion(this.textContent)">Robotics teams in Delhi</button>
+          <button type="button" class="suggestion-chip" onclick="applySuggestion(this.textContent)">AI companies in Mumbai</button>
         </div>
 
         <!-- Controls: Category Focus & Target Limit -->
         <div class="controls-grid">
           <div class="selector-group">
-            <span class="selector-label">Target category</span>
+            <span class="selector-label">Find</span>
             <div class="segment-picker" role="group" aria-label="Category Selection">
               <button type="button" class="segment-btn active" id="btnCatBoth" onclick="selectCategory('Both')">Both</button>
               <button type="button" class="segment-btn" id="btnCatSponsor" onclick="selectCategory('Sponsor')">Sponsors</button>
@@ -1032,7 +1094,7 @@
           </div>
           <div>
             <button type="button" id="btnFindLeads" class="btn-action-primary" onclick="triggerDiscoveryRun()">
-              <i data-lucide="search" style="width:15px;height:15px;"></i>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
               <span>Find leads</span>
             </button>
           </div>
@@ -1041,9 +1103,12 @@
         <!-- Brochure PDF Upload (Progressive Disclosure) -->
         <div class="brochure-disclosure">
           <button type="button" class="disclosure-toggle" id="btnToggleBrochure" onclick="toggleBrochureUpload()" aria-expanded="false">
-            <i data-lucide="chevron-down" style="width:14px;height:14px;"></i>
-            <span>Attach event brochure (PDF)</span>
-            <span style="color:var(--text-muted);font-weight:400;margin-left:4px;">— optional, extracts sponsor context</span>
+            <svg class="disclosure-chevron" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><path d="m6 9 6 6 6-6"></path></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg>
+            <span class="disclosure-text-group">
+              <span class="disclosure-title">Add event brochure (PDF)</span>
+              <span class="disclosure-subtext">Optional · helps tailor sponsor relevance</span>
+            </span>
           </button>
           <div id="brochureUploadArea" class="disclosure-content hidden">
             <input type="file" id="inputBrochureFile" accept=".pdf,application/pdf" style="display:none;" onchange="onBrochureSelected(event)" />
@@ -1053,18 +1118,24 @@
             </div>
             <div id="selectedFileBadge" class="uploaded-file-row hidden">
               <div class="file-details">
-                <i data-lucide="file-text" style="width:16px;height:16px;color:var(--action-primary);"></i>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--action-primary);" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg>
                 <div>
                   <div class="file-name" id="labelFileName"></div>
                   <div class="file-size" id="labelFileSize"></div>
                 </div>
               </div>
               <button type="button" class="file-remove-btn" onclick="clearSelectedFile()" aria-label="Remove attached file">
-                <i data-lucide="x" style="width:14px;height:14px;"></i>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
               </button>
             </div>
           </div>
         </div>
+      </div>
+
+      <!-- Trust Note beneath main surface -->
+      <div class="trust-note-row">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="m9 12 2 2 4-4"></path></svg>
+        <span>Review source links and contact verification before outreach.</span>
       </div>
 
       <!-- Running Job Progress Card -->
@@ -1115,7 +1186,7 @@
         <!-- Technical Activity Disclosure -->
         <div class="tech-log-wrapper">
           <button type="button" class="disclosure-toggle" id="btnToggleTechLog" onclick="toggleTechLog()" aria-expanded="false">
-            <i data-lucide="chevron-down" style="width:13px;height:13px;"></i>
+            <svg class="disclosure-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
             <span>Technical activity & execution logs</span>
           </button>
           <div id="terminalLogBox" class="tech-log-terminal hidden" aria-live="polite"></div>

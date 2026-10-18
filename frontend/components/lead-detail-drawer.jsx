@@ -26,23 +26,23 @@ export function LeadDetailDrawer({ lead, isOpen, onClose, onToggleOutreach, isCo
 
   return (
     <div
-      className="fixed inset-0 bg-black/40 z-50 flex justify-end transition-opacity"
+      className="fixed inset-0 bg-[#222722]/40 z-50 flex justify-end transition-opacity"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md bg-white h-full shadow-2xl flex flex-col overflow-y-auto"
+        className="w-full max-w-md bg-[#FFFEFB] h-full shadow-2xl flex flex-col overflow-y-auto border-l border-[#E5E0D7]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Header */}
-        <div className="px-6 py-5 border-b border-[#E2E6EA] flex items-center justify-between">
+        <div className="px-6 py-5 border-b border-[#E5E0D7] flex items-center justify-between">
           <div>
-            <h3 className="text-base font-bold text-[#17202A]">{org}</h3>
-            <span className="text-xs text-[#5F6B76]">IIT Kharagpur Event Lead</span>
+            <h3 className="text-base font-bold text-[#222722]">{org}</h3>
+            <span className="text-xs text-[#69716C]">IIT Kharagpur Event Lead</span>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-[#77818B] hover:text-[#17202A] hover:bg-[#F1F3F5] transition-colors"
+            className="p-1.5 rounded-lg text-[#8C938E] hover:text-[#222722] hover:bg-[#F2EFE9] transition-colors"
             aria-label="Close detail panel"
           >
             <X className="w-4 h-4" />
@@ -53,34 +53,34 @@ export function LeadDetailDrawer({ lead, isOpen, onClose, onToggleOutreach, isCo
         <div className="p-6 flex-1 flex flex-col gap-5">
           {/* Category & Location */}
           <div>
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-[#77818B] block mb-1">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-[#8C938E] block mb-1">
               Category & Location
             </span>
             <div className="flex items-center gap-2">
               <span
                 className={`inline-block text-xs font-medium px-2 py-0.5 rounded ${
                   cat === "Sponsor"
-                    ? "bg-[#E6F6F8] text-[#087F8C]"
-                    : "bg-[#F2EEFA] text-[#6B4DB3]"
+                    ? "bg-[#E8F1EC] text-[#17664F]"
+                    : "bg-[#F2EEFA] text-[#5A4588]"
                 }`}
               >
                 {cat}
               </span>
-              <span className="text-sm text-[#5F6B76]">{loc}</span>
+              <span className="text-sm text-[#69716C]">{loc}</span>
             </div>
           </div>
 
           {/* Contact Person */}
           <div>
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-[#77818B] block mb-1">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-[#8C938E] block mb-1">
               Contact Person & Role
             </span>
-            <div className="text-sm font-medium text-[#17202A]">{person}</div>
+            <div className="text-sm font-medium text-[#222722]">{person}</div>
           </div>
 
           {/* Contact Channel */}
           <div>
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-[#77818B] block mb-1">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-[#8C938E] block mb-1">
               Deliverable Contact Channel
             </span>
             <div className="flex items-center gap-2 mt-1">
@@ -89,35 +89,35 @@ export function LeadDetailDrawer({ lead, isOpen, onClose, onToggleOutreach, isCo
                   href={channel}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm font-medium text-[#2457C5] hover:underline flex items-center gap-1 truncate"
+                  className="text-sm font-medium text-[#17664F] hover:underline flex items-center gap-1 truncate"
                 >
                   <span className="truncate">{channel}</span>
                   <ExternalLink className="w-3.5 h-3.5 shrink-0" />
                 </a>
               ) : (
-                <span className="text-sm font-medium text-[#17202A]">{channel}</span>
+                <span className="text-sm font-medium text-[#222722]">{channel}</span>
               )}
               <button
                 type="button"
                 onClick={handleCopy}
-                className="p-1 text-[#77818B] hover:text-[#17202A] hover:bg-[#F1F3F5] rounded transition-colors"
+                className="p-1 text-[#8C938E] hover:text-[#222722] hover:bg-[#F2EFE9] rounded transition-colors"
                 title="Copy contact"
               >
-                {copied ? <Check className="w-3.5 h-3.5 text-[#18794E]" /> : <Copy className="w-3.5 h-3.5" />}
+                {copied ? <Check className="w-3.5 h-3.5 text-[#17664F]" /> : <Copy className="w-3.5 h-3.5" />}
               </button>
             </div>
           </div>
 
           {/* Verification Evidence */}
           <div>
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-[#77818B] block mb-1">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-[#8C938E] block mb-1">
               Verification Evidence
             </span>
             <div
               className={`p-3.5 rounded-lg border text-xs leading-relaxed ${
                 status === "Verified"
-                  ? "bg-[#EBF8F1] border-[#C3E6D2] text-[#18794E]"
-                  : "bg-[#FEF7E8] border-[#F8DFAC] text-[#946200]"
+                  ? "bg-[#E8F1EC] border-[#D0E2D8] text-[#17664F]"
+                  : "bg-[#FDF4E2] border-[#F8DFAC] text-[#8A5F00]"
               }`}
             >
               {status === "Verified" ? (
@@ -134,10 +134,10 @@ export function LeadDetailDrawer({ lead, isOpen, onClose, onToggleOutreach, isCo
 
           {/* Event Context & Outreach */}
           <div>
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-[#77818B] block mb-1">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-[#8C938E] block mb-1">
               Outreach Workflow
             </span>
-            <p className="text-xs text-[#5F6B76] mb-2">
+            <p className="text-xs text-[#69716C] mb-2">
               Mark this lead as contacted once outreach has been initiated by the student relations team.
             </p>
             <button
@@ -145,8 +145,8 @@ export function LeadDetailDrawer({ lead, isOpen, onClose, onToggleOutreach, isCo
               onClick={onToggleOutreach}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
                 isContacted
-                  ? "bg-[#EBF8F1] text-[#18794E] border-[#C3E6D2]"
-                  : "bg-white text-[#5F6B76] border-[#E2E6EA] hover:bg-[#F1F3F5]"
+                  ? "bg-[#E8F1EC] text-[#17664F] border-[#D0E2D8]"
+                  : "bg-[#FFFEFB] text-[#69716C] border-[#E5E0D7] hover:bg-[#F2EFE9]"
               }`}
             >
               <Clock className="w-3.5 h-3.5" />
@@ -156,11 +156,11 @@ export function LeadDetailDrawer({ lead, isOpen, onClose, onToggleOutreach, isCo
         </div>
 
         {/* Drawer Footer */}
-        <div className="p-4 border-t border-[#E2E6EA] bg-[#F1F3F5] flex gap-2">
+        <div className="p-4 border-t border-[#E5E0D7] bg-[#F2EFE9] flex gap-2">
           <button
             type="button"
             onClick={handleCopy}
-            className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#2457C5] hover:bg-[#1B44A0] text-white rounded-lg text-xs font-semibold transition-colors"
+            className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#17664F] hover:bg-[#125340] text-white rounded-lg text-xs font-semibold transition-colors"
           >
             <Copy className="w-3.5 h-3.5" />
             <span>{copied ? "Copied!" : "Copy Contact"}</span>
@@ -168,7 +168,7 @@ export function LeadDetailDrawer({ lead, isOpen, onClose, onToggleOutreach, isCo
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 bg-white hover:bg-[#F1F3F5] text-[#5F6B76] border border-[#E2E6EA] rounded-lg text-xs font-semibold transition-colors"
+            className="px-4 py-2 bg-[#FFFEFB] hover:bg-[#F2EFE9] text-[#69716C] border border-[#E5E0D7] rounded-lg text-xs font-semibold transition-colors"
           >
             Close
           </button>

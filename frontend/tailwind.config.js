@@ -8,41 +8,42 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        app: "#F7F8FA",
-        surface: "#FFFFFF",
-        secondary: "#F1F3F5",
+        app: "#F7F5F0",
+        surface: "#FFFEFB",
+        secondary: "#F2EFE9",
         border: {
-          DEFAULT: "#E2E6EA",
-          subtle: "#F1F3F5",
+          DEFAULT: "#E5E0D7",
+          subtle: "#F2EFE9",
         },
         action: {
-          DEFAULT: "#2457C5",
-          hover: "#1B44A0",
+          DEFAULT: "#17664F",
+          hover: "#125340",
+          tint: "#E8F1EC",
         },
         sponsor: {
-          DEFAULT: "#087F8C",
-          bg: "#E6F6F8",
+          DEFAULT: "#17664F",
+          bg: "#E8F1EC",
         },
         delegation: {
-          DEFAULT: "#6B4DB3",
+          DEFAULT: "#5A4588",
           bg: "#F2EEFA",
         },
         success: {
-          DEFAULT: "#18794E",
-          bg: "#EBF8F1",
+          DEFAULT: "#17664F",
+          bg: "#E8F1EC",
         },
         warning: {
-          DEFAULT: "#946200",
-          bg: "#FEF7E8",
+          DEFAULT: "#8A5F00",
+          bg: "#FDF4E2",
         },
         error: {
           DEFAULT: "#B42318",
-          bg: "#FEE4E2",
+          bg: "#FEECEB",
         },
         text: {
-          primary: "#17202A",
-          secondary: "#5F6B76",
-          muted: "#77818B",
+          primary: "#222722",
+          secondary: "#69716C",
+          muted: "#8C938E",
         },
       },
       fontFamily: {

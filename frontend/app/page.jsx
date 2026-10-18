@@ -166,55 +166,47 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F7F8FA]">
+    <div className="flex flex-col min-h-screen bg-[#F7F5F0] text-[#222722]">
       {/* Top Navbar */}
-      <header className="sticky top-0 z-40 bg-white border-b border-[#E2E6EA] h-14 flex items-center">
+      <header className="sticky top-0 z-40 bg-[#F7F5F0] border-b border-[#E5E0D7] h-16 flex items-center">
         <div className="max-w-5xl w-full mx-auto px-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-[#2457C5] text-white flex items-center justify-center font-bold text-xs">
+            <div className="w-8 h-8 rounded-md bg-[#17664F] text-white flex items-center justify-center font-bold text-xs tracking-tight">
               CQ
             </div>
             <div>
-              <span className="text-sm font-semibold text-[#17202A] block leading-tight">
+              <span className="text-[15px] font-bold text-[#222722] block leading-tight">
                 CQ Scraper
               </span>
-              <span className="text-[11px] text-[#77818B] font-medium">
-                IIT Kharagpur Event Lead Discovery
+              <span className="text-xs text-[#69716C] font-normal">
+                IIT Kharagpur · Event Lead Discovery
               </span>
             </div>
           </div>
 
-          <nav className="flex items-center gap-1 bg-[#F1F3F5] p-1 rounded-lg">
+          <nav className="flex items-center gap-6 h-16">
             <button
               type="button"
               onClick={() => setActiveTab("discovery")}
-              className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs rounded-md transition-all ${
+              className={`h-full inline-flex items-center text-sm transition-all border-b-2 px-0.5 ${
                 activeTab === "discovery"
-                  ? "bg-white text-[#2457C5] font-semibold shadow-sm"
-                  : "text-[#5F6B76] hover:text-[#17202A] font-medium"
+                  ? "border-[#17664F] text-[#17664F] font-semibold"
+                  : "border-transparent text-[#69716C] hover:text-[#222722] font-medium"
               }`}
             >
-              <Compass className="w-3.5 h-3.5" />
               <span>Discovery</span>
             </button>
             <button
               type="button"
               onClick={() => setActiveTab("leads")}
-              className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs rounded-md transition-all ${
+              className={`h-full inline-flex items-center gap-2 text-sm transition-all border-b-2 px-0.5 ${
                 activeTab === "leads"
-                  ? "bg-white text-[#2457C5] font-semibold shadow-sm"
-                  : "text-[#5F6B76] hover:text-[#17202A] font-medium"
+                  ? "border-[#17664F] text-[#17664F] font-semibold"
+                  : "border-transparent text-[#69716C] hover:text-[#222722] font-medium"
               }`}
             >
-              <ListFilter className="w-3.5 h-3.5" />
               <span>Leads</span>
-              <span
-                className={`text-[10px] font-semibold px-1.5 py-0.2 rounded-full ${
-                  activeTab === "leads"
-                    ? "bg-[#EBF0FA] text-[#2457C5]"
-                    : "bg-[#E2E6EA] text-[#5F6B76]"
-                }`}
-              >
+              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#E5E0D7] text-[#222722]">
                 {leads.length}
               </span>
             </button>
@@ -226,12 +218,15 @@ export default function DashboardPage() {
       <main className="flex-1 max-w-5xl w-full mx-auto px-6 py-8">
         {activeTab === "discovery" && (
           <div className="space-y-6">
-            <div>
-              <h1 className="text-2xl font-bold text-[#17202A] tracking-tight">
-                Find potential sponsors and delegations
+            <div className="mt-2 mb-6">
+              <div className="text-[11px] font-bold tracking-wider text-[#17664F] uppercase mb-2">
+                EVENT RESEARCH WORKSPACE
+              </div>
+              <h1 className="text-3xl font-bold text-[#222722] tracking-tight">
+                Find the right sponsors and college delegations.
               </h1>
-              <p className="text-sm text-[#5F6B76] mt-1">
-                Describe the organizations you want to find for your IIT Kharagpur event.
+              <p className="text-[15px] text-[#69716C] mt-2">
+                Discover relevant organizations for your IIT Kharagpur event, then review sources before outreach.
               </p>
             </div>
 
@@ -278,7 +273,7 @@ export default function DashboardPage() {
       />
 
       {/* Footer */}
-      <footer className="border-t border-[#E2E6EA] bg-white py-4 text-center text-xs text-[#77818B]">
+      <footer className="border-t border-[#E5E0D7] bg-[#FFFEFB] py-4 text-center text-xs text-[#8C938E] mt-auto">
         CQ Scraper · IIT Kharagpur Event Lead Discovery · LangGraph Cyclical Pipeline
       </footer>
     </div>
