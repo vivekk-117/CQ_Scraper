@@ -172,8 +172,10 @@ class BrochureParser:
         rendered_images: list[str],
     ) -> BrochureContext:
         """Synthesizes structured context using LLM or robust heuristic fallback."""
-        # Check if OpenAI API key is available
-        if settings.openai_api_key and not settings.openai_api_key.startswith("your_"):
+        from src.utils.llm_factory import is_llm_configured
+
+        # Check if LLM API key is available (Groq or OpenAI)
+        if is_llm_configured():
             try:
                 return self._synthesize_with_llm(
                     extracted_text=extracted_text,
@@ -194,15 +196,11 @@ class BrochureParser:
         is_raster: bool,
         rendered_images: list[str],
     ) -> BrochureContext:
-        """Extracts structured entities via LangChain ChatOpenAI with structured output."""
-        from langchain_openai import ChatOpenAI
+        """Extracts structured entities via LangChain with structured output."""
+        from src.utils.llm_factory import get_llm, is_groq
         from langchain_core.messages import HumanMessage, SystemMessage
 
-        llm = ChatOpenAI(
-            model="gpt-4o",
-            temperature=0.0,
-            openai_api_key=settings.openai_api_key,
-        )
+        llm = get_llm(temperature=0.0)
         structured_llm = llm.with_structured_output(BrochureContext)
 
         system_prompt = (
@@ -222,8 +220,8 @@ class BrochureParser:
             }
         ]
 
-        # Add multimodal images if raster-based
-        if is_raster and rendered_images:
+        # Add multimodal images if raster-based and supported (non-Groq)
+        if is_raster and rendered_images and not is_groq():
             for b64 in rendered_images:
                 content.append({
                     "type": "image_url",

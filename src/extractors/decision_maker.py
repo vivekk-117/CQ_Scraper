@@ -184,8 +184,10 @@ class DecisionMakerExtractor:
         aggregated_text = "\n\n".join(combined_text_chunks)
         personal_profiles = cls.extract_personal_social_profiles(all_discovered_socials)
 
-        # 1. Attempt LLM-based structured extraction if OpenAI API key is available
-        if settings.openai_api_key and not settings.openai_api_key.startswith("your_"):
+        # 1. Attempt LLM-based structured extraction if LLM is configured (Groq or OpenAI)
+        from src.utils.llm_factory import is_llm_configured, get_llm
+
+        if is_llm_configured():
             try:
                 res = cls._extract_with_llm(
                     org_name=org_name,
@@ -244,14 +246,10 @@ class DecisionMakerExtractor:
         source_url: str,
     ) -> Optional[DecisionMakerResult]:
         """Executes LLM extraction with strict Zero-Hallucination prompt constraints."""
-        from langchain_openai import ChatOpenAI
+        from src.utils.llm_factory import get_llm
         from langchain_core.messages import HumanMessage, SystemMessage
 
-        llm = ChatOpenAI(
-            model="gpt-4o",
-            temperature=0.0,
-            openai_api_key=settings.openai_api_key,
-        )
+        llm = get_llm(temperature=0.0)
         structured_llm = llm.with_structured_output(DecisionMakerResult)
 
         role_target = (
@@ -287,6 +285,11 @@ class DecisionMakerExtractor:
             if not result.source_url:
                 result.source_url = source_url
             return result
+        elif isinstance(result, dict):
+            res_obj = DecisionMakerResult(**result)
+            if not res_obj.source_url:
+                res_obj.source_url = source_url
+            return res_obj
         return None
 
     @classmethod

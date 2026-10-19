@@ -58,6 +58,49 @@ class TestUnifiedSearchClient:
             assert res.url.startswith("http")
             assert len(res.title) > 0
 
+    @pytest.mark.asyncio
+    async def test_langsearch_success(self):
+        """Test LangSearch Web Search API query and structured result parsing."""
+        mock_response = {
+            "data": {
+                "webPages": {
+                    "value": [
+                        {
+                            "name": "IIT Kharagpur Robotics Society",
+                            "url": "https://robotics.iitkgp.ac.in",
+                            "snippet": "Student robotics and autonomous systems group at IIT KGP.",
+                        }
+                    ]
+                }
+            }
+        }
+
+        with patch("httpx.AsyncClient.post") as mock_post:
+            from unittest.mock import MagicMock
+            mock_resp = MagicMock()
+            mock_resp.status_code = 200
+            mock_resp.json.return_value = mock_response
+            mock_resp.raise_for_status.return_value = None
+            mock_post.return_value = mock_resp
+
+            client = UnifiedSearchClient(langsearch_api_key="ls-valid-mock-key-123456789")
+            results = await client.search("Robotics society IIT Kharagpur", max_results=1)
+
+            assert len(results) == 1
+            assert results[0].url == "https://robotics.iitkgp.ac.in"
+            assert "IIT Kharagpur" in results[0].title
+            assert "robotics" in results[0].snippet.lower()
+
+    @pytest.mark.asyncio
+    async def test_langsearch_error_falls_back(self):
+        """Test LangSearch error triggers graceful fallback without raising exceptions."""
+        with patch("httpx.AsyncClient.post", side_effect=Exception("API connection timeout")):
+            client = UnifiedSearchClient(langsearch_api_key="ls-valid-mock-key-123456789")
+            results = await client.search('Find "Acme" lead', max_results=2)
+
+            assert len(results) >= 1
+            assert results[0].url.startswith("http")
+
 
 class TestLinkPrioritizer:
     def test_url_normalization(self):

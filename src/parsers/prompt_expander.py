@@ -50,8 +50,10 @@ class PromptExpander:
         if not clean_prompt:
             raise ValueError("Search prompt cannot be empty.")
 
-        # Attempt LLM structured parsing if API key is configured
-        if settings.openai_api_key and not settings.openai_api_key.startswith("your_"):
+        # Attempt LLM structured parsing if an LLM is configured (Groq or OpenAI)
+        from src.utils.llm_factory import is_llm_configured, get_llm
+
+        if is_llm_configured():
             try:
                 return self._expand_with_llm(clean_prompt)
             except Exception as e:
@@ -61,15 +63,11 @@ class PromptExpander:
         return self._heuristic_expand(clean_prompt)
 
     def _expand_with_llm(self, prompt: str) -> ParsedPromptContext:
-        """Invokes OpenAI with structured output to expand prompt intent."""
-        from langchain_openai import ChatOpenAI
+        """Invokes LLM with structured output to expand prompt intent."""
+        from src.utils.llm_factory import get_llm
         from langchain_core.messages import HumanMessage, SystemMessage
 
-        llm = ChatOpenAI(
-            model="gpt-4o",
-            temperature=0.0,
-            openai_api_key=settings.openai_api_key,
-        )
+        llm = get_llm(temperature=0.0)
         structured_llm = llm.with_structured_output(ParsedPromptContext)
 
         system_prompt = (

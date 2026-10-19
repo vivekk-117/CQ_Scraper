@@ -17,8 +17,11 @@ try:
     class Settings(BaseSettings):
         model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
+        groq_api_key: Optional[str] = Field(default=None, alias="GROQ_API_KEY")
+        groq_model: str = Field(default="llama-3.3-70b-versatile", alias="GROQ_MODEL")
         openai_api_key: Optional[str] = Field(default=None, alias="OPENAI_API_KEY")
         anthropic_api_key: Optional[str] = Field(default=None, alias="ANTHROPIC_API_KEY")
+        langsearch_api_key: Optional[str] = Field(default=None, alias="LANGSEARCH_API_KEY")
         tavily_api_key: Optional[str] = Field(default=None, alias="TAVILY_API_KEY")
         serper_api_key: Optional[str] = Field(default=None, alias="SERPER_API_KEY")
         google_application_credentials: Optional[str] = Field(
@@ -37,8 +40,11 @@ except ImportError:
     # Graceful fallback before pydantic-settings is installed
     class FallbackSettings:
         def __init__(self):
+            self.groq_api_key = os.getenv("GROQ_API_KEY")
+            self.groq_model = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
             self.openai_api_key = os.getenv("OPENAI_API_KEY")
             self.anthropic_api_key = os.getenv("ANTHROPIC_API_KEY")
+            self.langsearch_api_key = os.getenv("LANGSEARCH_API_KEY")
             self.tavily_api_key = os.getenv("TAVILY_API_KEY")
             self.serper_api_key = os.getenv("SERPER_API_KEY")
             self.google_application_credentials = os.getenv(

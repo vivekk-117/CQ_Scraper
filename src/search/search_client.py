@@ -30,9 +30,11 @@ class UnifiedSearchClient:
 
     def __init__(
         self,
+        langsearch_api_key: Optional[str] = None,
         tavily_api_key: Optional[str] = None,
         serper_api_key: Optional[str] = None,
     ):
+        self.langsearch_api_key = langsearch_api_key or settings.langsearch_api_key
         self.tavily_api_key = tavily_api_key or settings.tavily_api_key
         self.serper_api_key = serper_api_key or settings.serper_api_key
 
@@ -42,7 +44,16 @@ class UnifiedSearchClient:
         if not clean_query:
             return []
 
-        # 1. Try Tavily Search API if key is available
+        # 1. Try LangSearch Web Search API if key is available
+        if self._is_valid_key(self.langsearch_api_key):
+            try:
+                results = await self._search_langsearch(clean_query, max_results)
+                if results:
+                    return results
+            except Exception as e:
+                logger.warning(f"LangSearch search failed for '{clean_query}': {e}. Falling back...")
+
+        # 2. Try Tavily Search API if key is available
         if self._is_valid_key(self.tavily_api_key):
             try:
                 results = await self._search_tavily(clean_query, max_results)
@@ -51,7 +62,7 @@ class UnifiedSearchClient:
             except Exception as e:
                 logger.warning(f"Tavily search failed for '{clean_query}': {e}. Falling back...")
 
-        # 2. Try Serper (Google Search) API if key is available
+        # 3. Try Serper (Google Search) API if key is available
         if self._is_valid_key(self.serper_api_key):
             try:
                 results = await self._search_serper(clean_query, max_results)
@@ -60,12 +71,60 @@ class UnifiedSearchClient:
             except Exception as e:
                 logger.warning(f"Serper search failed for '{clean_query}': {e}. Falling back...")
 
-        # 3. Deterministic search fallback (offline or testing environment)
+        # 4. Deterministic search fallback (offline or testing environment)
         logger.info(f"Using mock/deterministic search results for query: '{clean_query}'")
         return self._fallback_search(clean_query, max_results)
 
     def _is_valid_key(self, key: Optional[str]) -> bool:
         return bool(key and not key.startswith("your_") and len(key) > 8)
+
+    async def _search_langsearch(self, query: str, max_results: int) -> list[SearchResult]:
+        """Queries LangSearch Web Search API asynchronously."""
+        url = "https://api.langsearch.com/v1/web-search"
+        headers = {
+            "Authorization": f"Bearer {self.langsearch_api_key}",
+            "Content-Type": "application/json",
+        }
+        payload = {
+            "query": query,
+            "count": max(1, min(max_results, 20)),
+            "freshness": "noLimit",
+            "summary": True,
+        }
+
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            resp = await client.post(url, headers=headers, json=payload)
+            resp.raise_for_status()
+            data = resp.json()
+
+        web_pages = (
+            data.get("data", {}).get("webPages", {}).get("value")
+            or data.get("webPages", {}).get("value")
+            or data.get("value")
+            or data.get("results")
+            or []
+        )
+
+        results: list[SearchResult] = []
+        for item in web_pages:
+            u = item.get("url") or item.get("link") or ""
+            if u and u.startswith("http"):
+                title = item.get("name") or item.get("title") or ""
+                snippet = (
+                    item.get("snippet")
+                    or item.get("description")
+                    or item.get("summary")
+                    or ""
+                )
+                results.append(
+                    SearchResult(
+                        url=u,
+                        title=title,
+                        snippet=snippet,
+                        score=1.0,
+                    )
+                )
+        return results
 
     async def _search_tavily(self, query: str, max_results: int) -> list[SearchResult]:
         """Queries Tavily Search API asynchronously."""
