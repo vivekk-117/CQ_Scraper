@@ -44,32 +44,56 @@ class UnifiedSearchClient:
         if not clean_query:
             return []
 
-        # 1. Try LangSearch Web Search API if key is available
-        if self._is_valid_key(self.langsearch_api_key):
+        provider = (settings.search_provider or "auto").strip().lower()
+
+        # Explicit provider prioritization from .env
+        if provider == "langsearch" and self._is_valid_key(self.langsearch_api_key):
             try:
                 results = await self._search_langsearch(clean_query, max_results)
                 if results:
                     return results
             except Exception as e:
                 logger.warning(f"LangSearch search failed for '{clean_query}': {e}. Falling back...")
-
-        # 2. Try Tavily Search API if key is available
-        if self._is_valid_key(self.tavily_api_key):
+        elif provider == "tavily" and self._is_valid_key(self.tavily_api_key):
             try:
                 results = await self._search_tavily(clean_query, max_results)
                 if results:
                     return results
             except Exception as e:
                 logger.warning(f"Tavily search failed for '{clean_query}': {e}. Falling back...")
-
-        # 3. Try Serper (Google Search) API if key is available
-        if self._is_valid_key(self.serper_api_key):
+        elif provider == "serper" and self._is_valid_key(self.serper_api_key):
             try:
                 results = await self._search_serper(clean_query, max_results)
                 if results:
                     return results
             except Exception as e:
                 logger.warning(f"Serper search failed for '{clean_query}': {e}. Falling back...")
+
+        # Auto failover mode: try available providers in sequence
+        if provider == "auto":
+            if self._is_valid_key(self.langsearch_api_key):
+                try:
+                    results = await self._search_langsearch(clean_query, max_results)
+                    if results:
+                        return results
+                except Exception as e:
+                    logger.warning(f"LangSearch search failed for '{clean_query}': {e}. Falling back...")
+
+            if self._is_valid_key(self.tavily_api_key):
+                try:
+                    results = await self._search_tavily(clean_query, max_results)
+                    if results:
+                        return results
+                except Exception as e:
+                    logger.warning(f"Tavily search failed for '{clean_query}': {e}. Falling back...")
+
+            if self._is_valid_key(self.serper_api_key):
+                try:
+                    results = await self._search_serper(clean_query, max_results)
+                    if results:
+                        return results
+                except Exception as e:
+                    logger.warning(f"Serper search failed for '{clean_query}': {e}. Falling back...")
 
         # 4. Deterministic search fallback (offline or testing environment)
         logger.info(f"Using mock/deterministic search results for query: '{clean_query}'")
